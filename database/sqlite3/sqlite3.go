@@ -8,11 +8,11 @@ import (
 	nurl "net/url"
 	"strings"
 
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database"
-	"github.com/golang-migrate/migrate/v4/source"
 	"github.com/hashicorp/go-multierror"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/zgo-migration/migrate"
+	"github.com/zgo-migration/migrate/database"
+	"github.com/zgo-migration/migrate/source"
 )
 
 func init() {

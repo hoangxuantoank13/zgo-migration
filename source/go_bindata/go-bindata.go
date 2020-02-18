@@ -7,8 +7,9 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/golang-migrate/migrate/v4/source"
+	"github.com/zgo-migration/migrate/source"
 )
+
 //AssetFunc is a a function
 type AssetFunc func(name string) ([]byte, error)
 
@@ -73,6 +74,7 @@ func WithInstance(instance interface{}) (source.Driver, error) {
 
 	return bn, nil
 }
+
 // Close is part of source.Driver interface implementation.
 func (b *Bindata) Close() error {
 	return nil

@@ -2,12 +2,12 @@ package httpfs
 
 import (
 	"errors"
+	"github.com/spf13/viper"
+	"github.com/zgo-migration/migrate/source"
 	"io"
 	"net/http"
 	"os"
 	"path"
-	"github.com/golang-migrate/migrate/v4/source"
-	"github.com/spf13/viper"
 )
 
 const migrationConfigFile = "_migrations.json"

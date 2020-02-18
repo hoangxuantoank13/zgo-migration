@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/golang-migrate/migrate/v4"
-	dt "github.com/golang-migrate/migrate/v4/database/testing"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/zgo-migration/migrate"
+	dt "github.com/zgo-migration/migrate/database/testing"
+	_ "github.com/zgo-migration/migrate/source/file"
 )
 
 func Test(t *testing.T) {

@@ -10,8 +10,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/golang-migrate/migrate/v4/source"
 	"github.com/xanzy/go-gitlab"
+	"github.com/zgo-migration/migrate/source"
 )
 
 func init() {

@@ -15,13 +15,13 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/golang-migrate/migrate/v4"
+	"github.com/zgo-migration/migrate"
 
 	"github.com/dhui/dktest"
 
-	dt "github.com/golang-migrate/migrate/v4/database/testing"
-	"github.com/golang-migrate/migrate/v4/dktesting"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
+	dt "github.com/zgo-migration/migrate/database/testing"
+	"github.com/zgo-migration/migrate/dktesting"
+	_ "github.com/zgo-migration/migrate/source/file"
 )
 
 var (

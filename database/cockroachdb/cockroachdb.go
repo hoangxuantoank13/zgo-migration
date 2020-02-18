@@ -11,9 +11,9 @@ import (
 	"strconv"
 
 	"github.com/cockroachdb/cockroach-go/crdb"
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database"
-	"github.com/golang-migrate/migrate/v4/source"
+	"github.com/zgo-migration/migrate"
+	"github.com/zgo-migration/migrate/database"
+	"github.com/zgo-migration/migrate/source"
 	"github.com/hashicorp/go-multierror"
 	"github.com/lib/pq"
 )
@@ -191,7 +191,7 @@ func (c *CockroachDb) Lock() error {
 	if err != nil {
 		return err
 	}
-	
+
 	c.isLocked = true
 	return nil
 	

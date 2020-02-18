@@ -15,8 +15,8 @@ import (
 	"strings"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/golang-migrate/migrate/v4/database"
-	"github.com/golang-migrate/migrate/v4/source"
+	"github.com/zgo-migration/migrate/database"
+	"github.com/zgo-migration/migrate/source"
 	"github.com/hashicorp/go-multierror"
 )
 

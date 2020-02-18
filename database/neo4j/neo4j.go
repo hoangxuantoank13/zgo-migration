@@ -10,11 +10,11 @@ import (
 	"strconv"
 	"sync/atomic"
 
-	"github.com/golang-migrate/migrate/v4/database"
+	"github.com/zgo-migration/migrate/database"
 	"github.com/hashicorp/go-multierror"
 	"github.com/neo4j/neo4j-go-driver/neo4j"
 )
-import "github.com/golang-migrate/migrate/v4/source"
+import "github.com/zgo-migration/migrate/source"
 
 func init() {
 	db := Neo4j{}

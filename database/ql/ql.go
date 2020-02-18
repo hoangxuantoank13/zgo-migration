@@ -11,9 +11,9 @@ import (
 
 	nurl "net/url"
 
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database"
-	"github.com/golang-migrate/migrate/v4/source"
+	"github.com/zgo-migration/migrate"
+	"github.com/zgo-migration/migrate/database"
+	"github.com/zgo-migration/migrate/source"
 	_ "modernc.org/ql/driver"
 )
 

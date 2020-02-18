@@ -9,10 +9,10 @@ import (
 	nurl "net/url"
 
 	mssql "github.com/denisenkom/go-mssqldb" // mssql support
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database"
-	"github.com/golang-migrate/migrate/v4/source"
 	"github.com/hashicorp/go-multierror"
+	"github.com/zgo-migration/migrate"
+	"github.com/zgo-migration/migrate/database"
+	"github.com/zgo-migration/migrate/source"
 )
 
 func init() {

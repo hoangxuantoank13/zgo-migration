@@ -16,12 +16,12 @@ import (
 	"testing"
 
 	"github.com/dhui/dktest"
-	"github.com/golang-migrate/migrate/v4"
+	"github.com/zgo-migration/migrate"
 
-	dt "github.com/golang-migrate/migrate/v4/database/testing"
-	"github.com/golang-migrate/migrate/v4/dktesting"
+	dt "github.com/zgo-migration/migrate/database/testing"
+	"github.com/zgo-migration/migrate/dktesting"
 
-	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/zgo-migration/migrate/source/file"
 )
 
 var (

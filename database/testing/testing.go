@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang-migrate/migrate/v4/database"
+	"github.com/zgo-migration/migrate/database"
 )
 
 // Test runs tests against database implementations.
@@ -113,4 +113,3 @@ func TestDrop(t *testing.T, d database.Driver) {
 		t.Fatal(err)
 	}
 }
-
