@@ -56,7 +56,7 @@ func (f *File) Open(url string) (source.Driver, error) {
 		url:  url,
 		path: p,
 	}
-	if err := nf.Init(http.Dir(p), ""); err != nil {
+	if err := nf.Init(http.Dir(p), p); err != nil {
 		return nil, err
 	}
 	return nf, nil
