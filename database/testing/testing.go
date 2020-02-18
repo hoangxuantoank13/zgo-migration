@@ -20,23 +20,22 @@ func Test(t *testing.T, d database.Driver, migration []byte) {
 		t.Fatal("test must provide migration reader")
 	}
 
-	TestNilVersion(t, d) // test first
+	//TestNilVersion(t, d) // test first
 	TestLockAndUnlock(t, d)
 	TestRun(t, d, bytes.NewReader(migration))
-	TestSetVersion(t, d) // also tests Version()
 	// Drop breaks the driver, so test it last.
 	TestDrop(t, d)
 }
 
-func TestNilVersion(t *testing.T, d database.Driver) {
-	v, _, err := d.Version()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if v != database.NilVersion {
-		t.Fatalf("Version: expected version to be NilVersion (-1), got %v", v)
-	}
-}
+// func TestNilVersion(t *testing.T, d database.Driver) {
+// 	v, _, err := d.Version()
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	if v != database.NilVersion {
+// 		t.Fatalf("Version: expected version to be NilVersion (-1), got %v", v)
+// 	}
+// }
 
 func TestLockAndUnlock(t *testing.T, d database.Driver) {
 	// add a timeout, in case there is a deadlock
@@ -115,44 +114,3 @@ func TestDrop(t *testing.T, d database.Driver) {
 	}
 }
 
-func TestSetVersion(t *testing.T, d database.Driver) {
-	if err := d.SetVersion(1, true); err != nil {
-		t.Fatal(err)
-	}
-
-	// call again
-	if err := d.SetVersion(1, true); err != nil {
-		t.Fatal(err)
-	}
-
-	v, dirty, err := d.Version()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !dirty {
-		t.Fatal("expected dirty")
-	}
-	if v != 1 {
-		t.Fatal("expected version to be 1")
-	}
-
-	if err := d.SetVersion(2, false); err != nil {
-		t.Fatal(err)
-	}
-
-	// call again
-	if err := d.SetVersion(2, false); err != nil {
-		t.Fatal(err)
-	}
-
-	v, dirty, err = d.Version()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if dirty {
-		t.Fatal("expected not dirty")
-	}
-	if v != 2 {
-		t.Fatal("expected version to be 2")
-	}
-}

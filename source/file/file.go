@@ -14,12 +14,14 @@ func init() {
 	source.Register("file", &File{})
 }
 
+//File is struct of source
 type File struct {
 	httpfs.PartialDriver
 	url  string
 	path string
 }
 
+// Open is part of source.Driver interface implementation.
 func (f *File) Open(url string) (source.Driver, error) {
 	u, err := nurl.Parse(url)
 	if err != nil {

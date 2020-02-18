@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -141,41 +140,32 @@ Database drivers: `+strings.Join(database.List(), ", ")+"\n")
 
 		createCmd(*dirPtr, startTime, *formatPtr, name, *extPtr, seq, seqDigits)
 
-	case "goto":
-		if migraterErr != nil {
-			log.fatalErr(migraterErr)
-		}
+	// case "goto":
+	// 	if migraterErr != nil {
+	// 		log.fatalErr(migraterErr)
+	// 	}
 
-		if flag.Arg(1) == "" {
-			log.fatal("error: please specify version argument V")
-		}
+	// 	if flag.Arg(1) == "" {
+	// 		log.fatal("error: please specify version argument V")
+	// 	}
 
-		v, err := strconv.ParseUint(flag.Arg(1), 10, 64)
-		if err != nil {
-			log.fatal("error: can't read version argument V")
-		}
+	// 	v, err := strconv.ParseUint(flag.Arg(1), 10, 64)
+	// 	if err != nil {
+	// 		log.fatal("error: can't read version argument V")
+	// 	}
 
-		gotoCmd(migrater, uint(v))
+	// 	gotoCmd(migrater, uint(v))
 
-		if log.verbose {
-			log.Println("Finished after", time.Since(startTime))
-		}
+	// 	if log.verbose {
+	// 		log.Println("Finished after", time.Since(startTime))
+	// 	}
 
 	case "up":
 		if migraterErr != nil {
 			log.fatalErr(migraterErr)
 		}
 
-		limit := -1
-		if flag.Arg(1) != "" {
-			n, err := strconv.ParseUint(flag.Arg(1), 10, 64)
-			if err != nil {
-				log.fatal("error: can't read limit argument N")
-			}
-			limit = int(n)
-		}
-
-		upCmd(migrater, limit)
+		upCmd(migrater)
 
 		if log.verbose {
 			log.Println("Finished after", time.Since(startTime))
@@ -187,18 +177,13 @@ Database drivers: `+strings.Join(database.List(), ", ")+"\n")
 		}
 
 		downFlagSet := flag.NewFlagSet("down", flag.ExitOnError)
-		applyAll := downFlagSet.Bool("all", false, "Apply all down migrations")
 
 		args := flag.Args()[1:]
 		if err := downFlagSet.Parse(args); err != nil {
 			log.fatalErr(err)
 		}
 
-		downArgs := downFlagSet.Args()
-		num, needsConfirm, err := numDownMigrationsFromArgs(*applyAll, downArgs)
-		if err != nil {
-			log.fatalErr(err)
-		}
+		needsConfirm := true
 		if needsConfirm {
 			log.Println("Are you sure you want to apply all down migrations? [y/N]")
 			var response string
@@ -212,53 +197,53 @@ Database drivers: `+strings.Join(database.List(), ", ")+"\n")
 			}
 		}
 
-		downCmd(migrater, num)
+		downCmd(migrater)
 
 		if log.verbose {
 			log.Println("Finished after", time.Since(startTime))
 		}
 
-	case "drop":
-		if migraterErr != nil {
-			log.fatalErr(migraterErr)
-		}
+	// case "drop":
+	// 	if migraterErr != nil {
+	// 		log.fatalErr(migraterErr)
+	// 	}
 
-		dropCmd(migrater)
+	// 	dropCmd(migrater)
 
-		if log.verbose {
-			log.Println("Finished after", time.Since(startTime))
-		}
+	// 	if log.verbose {
+	// 		log.Println("Finished after", time.Since(startTime))
+	// 	}
 
-	case "force":
-		if migraterErr != nil {
-			log.fatalErr(migraterErr)
-		}
+	// case "force":
+	// 	if migraterErr != nil {
+	// 		log.fatalErr(migraterErr)
+	// 	}
 
-		if flag.Arg(1) == "" {
-			log.fatal("error: please specify version argument V")
-		}
+	// 	if flag.Arg(1) == "" {
+	// 		log.fatal("error: please specify version argument V")
+	// 	}
 
-		v, err := strconv.ParseInt(flag.Arg(1), 10, 64)
-		if err != nil {
-			log.fatal("error: can't read version argument V")
-		}
+	// 	v, err := strconv.ParseInt(flag.Arg(1), 10, 64)
+	// 	if err != nil {
+	// 		log.fatal("error: can't read version argument V")
+	// 	}
 
-		if v < -1 {
-			log.fatal("error: argument V must be >= -1")
-		}
+	// 	if v < -1 {
+	// 		log.fatal("error: argument V must be >= -1")
+	// 	}
 
-		forceCmd(migrater, int(v))
+	// 	forceCmd(migrater, int(v))
 
-		if log.verbose {
-			log.Println("Finished after", time.Since(startTime))
-		}
+	// 	if log.verbose {
+	// 		log.Println("Finished after", time.Since(startTime))
+	// 	}
 
-	case "version":
-		if migraterErr != nil {
-			log.fatalErr(migraterErr)
-		}
+	// case "version":
+	// 	if migraterErr != nil {
+	// 		log.fatalErr(migraterErr)
+	// 	}
 
-		versionCmd(migrater)
+	// 	versionCmd(migrater)
 
 	default:
 		flag.Usage()

@@ -109,7 +109,7 @@ func TestOpenWithRelativePath(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = d.First()
+	_, _, err = d.ReadUp("1_foobar")
 	if err != nil {
 		t.Fatalf("expected first file in working dir %v for foo", tmpDir)
 	}
@@ -119,7 +119,7 @@ func TestOpenWithRelativePath(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = d.First()
+	_, _, err = d.ReadUp("1_foobar")
 	if err != nil {
 		t.Fatalf("expected first file in working dir %v for ./foo", tmpDir)
 	}
@@ -218,25 +218,6 @@ func BenchmarkOpen(b *testing.B) {
 		_, err := f.Open("file://" + dir)
 		if err != nil {
 			b.Error(err)
-		}
-	}
-	b.StopTimer()
-}
-
-func BenchmarkNext(b *testing.B) {
-	dir := mustCreateBenchmarkDir(b)
-	defer func() {
-		if err := os.RemoveAll(dir); err != nil {
-			b.Error(err)
-		}
-	}()
-	f := &File{}
-	d, _ := f.Open("file://" + dir)
-	b.ResetTimer()
-	v, err := d.First()
-	for n := 0; n < b.N; n++ {
-		for !os.IsNotExist(err) {
-			v, err = d.Next(v)
 		}
 	}
 	b.StopTimer()

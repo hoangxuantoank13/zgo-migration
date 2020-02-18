@@ -3,15 +3,17 @@ package ql
 import (
 	"database/sql"
 	"fmt"
-	"github.com/hashicorp/go-multierror"
 	"io"
 	"io/ioutil"
 	"strings"
+
+	"github.com/hashicorp/go-multierror"
 
 	nurl "net/url"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database"
+	"github.com/golang-migrate/migrate/v4/source"
 	_ "modernc.org/ql/driver"
 )
 
@@ -235,4 +237,14 @@ func (m *Ql) Version() (version int, dirty bool, err error) {
 		return database.NilVersion, false, nil
 	}
 	return version, dirty, nil
+}
+
+// StoreMigration store migration file to DB
+func (m *Ql) StoreMigration(raw string, identifier string, direction source.Direction) error {
+	return nil
+}
+
+// IsMigrationExist check whether a migration file is imported
+func (m *Ql) IsMigrationExist(identifier string, direction source.Direction) (ret bool, err error) {
+	return false, nil
 }

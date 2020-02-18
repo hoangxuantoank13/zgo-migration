@@ -9,17 +9,13 @@ import (
 	nurl "net/url"
 	"regexp"
 	"strconv"
-)
 
-import (
 	"github.com/cockroachdb/cockroach-go/crdb"
-	"github.com/hashicorp/go-multierror"
-	"github.com/lib/pq"
-)
-
-import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database"
+	"github.com/golang-migrate/migrate/v4/source"
+	"github.com/hashicorp/go-multierror"
+	"github.com/lib/pq"
 )
 
 func init() {
@@ -29,14 +25,19 @@ func init() {
 	database.Register("crdb-postgres", &db)
 }
 
+// DefaultMigrationsTable is default Migrations table
 var DefaultMigrationsTable = "schema_migrations"
+
+// DefaultLockTable is default Lock table
 var DefaultLockTable = "schema_lock"
 
+//Error const
 var (
 	ErrNilConfig      = fmt.Errorf("no config")
 	ErrNoDatabaseName = fmt.Errorf("no database name")
 )
 
+// Config is config of DB
 type Config struct {
 	MigrationsTable string
 	LockTable       string
@@ -44,6 +45,7 @@ type Config struct {
 	DatabaseName    string
 }
 
+//CockroachDb is struct of DB
 type CockroachDb struct {
 	db       *sql.DB
 	isLocked bool
@@ -52,6 +54,7 @@ type CockroachDb struct {
 	config *Config
 }
 
+// WithInstance return instance of DB
 func WithInstance(instance *sql.DB, config *Config) (database.Driver, error) {
 	if config == nil {
 		return nil, ErrNilConfig
@@ -100,6 +103,7 @@ func WithInstance(instance *sql.DB, config *Config) (database.Driver, error) {
 	return px, nil
 }
 
+// Open is part of database.Driver interface implementation.
 func (c *CockroachDb) Open(url string) (database.Driver, error) {
 	purl, err := nurl.Parse(url)
 	if err != nil {
@@ -145,11 +149,12 @@ func (c *CockroachDb) Open(url string) (database.Driver, error) {
 	return px, nil
 }
 
+// Close is part of database.Driver interface implementation.
 func (c *CockroachDb) Close() error {
 	return c.db.Close()
 }
 
-// Locking is done manually with a separate lock table.  Implementing advisory locks in CRDB is being discussed
+// Lock is done manually with a separate lock table.  Implementing advisory locks in CRDB is being discussed
 // See: https://github.com/cockroachdb/cockroach/issues/13546
 func (c *CockroachDb) Lock() error {
 	err := crdb.ExecuteTx(context.Background(), c.db, nil, func(tx *sql.Tx) (err error) {
@@ -185,13 +190,14 @@ func (c *CockroachDb) Lock() error {
 
 	if err != nil {
 		return err
-	} else {
-		c.isLocked = true
-		return nil
 	}
+	
+	c.isLocked = true
+	return nil
+	
 }
 
-// Locking is done manually with a separate lock table.  Implementing advisory locks in CRDB is being discussed
+// Unlock is done manually with a separate lock table.  Implementing advisory locks in CRDB is being discussed
 // See: https://github.com/cockroachdb/cockroach/issues/13546
 func (c *CockroachDb) Unlock() error {
 	aid, err := database.GenerateAdvisoryLockId(c.config.DatabaseName)
@@ -219,6 +225,7 @@ func (c *CockroachDb) Unlock() error {
 	return nil
 }
 
+// Run is part of database.Driver interface implementation.
 func (c *CockroachDb) Run(migration io.Reader) error {
 	migr, err := ioutil.ReadAll(migration)
 	if err != nil {
@@ -234,6 +241,7 @@ func (c *CockroachDb) Run(migration io.Reader) error {
 	return nil
 }
 
+// SetVersion is part of database.Driver interface implementation.
 func (c *CockroachDb) SetVersion(version int, dirty bool) error {
 	return crdb.ExecuteTx(context.Background(), c.db, nil, func(tx *sql.Tx) error {
 		if _, err := tx.Exec(`DELETE FROM "` + c.config.MigrationsTable + `"`); err != nil {
@@ -250,6 +258,7 @@ func (c *CockroachDb) SetVersion(version int, dirty bool) error {
 	})
 }
 
+// Version is part of database.Driver interface implementation.
 func (c *CockroachDb) Version() (version int, dirty bool, err error) {
 	query := `SELECT version, dirty FROM "` + c.config.MigrationsTable + `" LIMIT 1`
 	err = c.db.QueryRow(query).Scan(&version, &dirty)
@@ -273,6 +282,7 @@ func (c *CockroachDb) Version() (version int, dirty bool, err error) {
 	}
 }
 
+// Drop is part of database.Driver interface implementation.
 func (c *CockroachDb) Drop() (err error) {
 	// select all tables in current schema
 	query := `SELECT table_name FROM information_schema.tables WHERE table_schema=(SELECT current_schema())`
@@ -365,4 +375,15 @@ func (c *CockroachDb) ensureLockTable() error {
 	}
 
 	return nil
+}
+
+
+// StoreMigration store migration file to DB
+func (c *CockroachDb) StoreMigration(raw string, identifier string, direction source.Direction) error {
+	return nil
+}
+
+// IsMigrationExist check whether a migration file is imported
+func (c *CockroachDb) IsMigrationExist(identifier string, direction source.Direction) (ret bool, err error) {
+	return false, nil
 }

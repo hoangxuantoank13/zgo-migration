@@ -7,6 +7,7 @@ import (
 // Direction is either up or down.
 type Direction string
 
+//Direction const
 const (
 	Down Direction = "down"
 	Up   Direction = "up"
@@ -16,9 +17,6 @@ const (
 // build the full directory tree in memory.
 // Migration is fully independent from migrate.Migration.
 type Migration struct {
-	// Version is the version of this migration.
-	Version uint
-
 	// Identifier can be any string that helps identifying
 	// this migration in the source.
 	Identifier string
@@ -34,110 +32,82 @@ type Migration struct {
 // Migrations wraps Migration and has an internal index
 // to keep track of Migration order.
 type Migrations struct {
-	index      uintSlice
-	migrations map[uint]map[Direction]*Migration
+	//index      stringSlice
+	migrations map[string]map[Direction]*Migration
 }
 
+//NewMigrations constructor
 func NewMigrations() *Migrations {
 	return &Migrations{
-		index:      make(uintSlice, 0),
-		migrations: make(map[uint]map[Direction]*Migration),
+		//index:      make(stringSlice, 0),
+		migrations: make(map[string]map[Direction]*Migration),
 	}
 }
 
+//Append append a Migration to Migrations
 func (i *Migrations) Append(m *Migration) (ok bool) {
 	if m == nil {
 		return false
 	}
 
-	if i.migrations[m.Version] == nil {
-		i.migrations[m.Version] = make(map[Direction]*Migration)
+	if i.migrations[m.Identifier] == nil {
+		i.migrations[m.Identifier] = make(map[Direction]*Migration)
 	}
 
 	// reject duplicate versions
-	if _, dup := i.migrations[m.Version][m.Direction]; dup {
+	if _, dup := i.migrations[m.Identifier][m.Direction]; dup {
 		return false
 	}
 
-	i.migrations[m.Version][m.Direction] = m
-	i.buildIndex()
+	i.migrations[m.Identifier][m.Direction] = m
+	//i.buildIndex()
 
 	return true
 }
 
-func (i *Migrations) buildIndex() {
-	i.index = make(uintSlice, 0)
-	for version := range i.migrations {
-		i.index = append(i.index, version)
-	}
-	sort.Sort(i.index)
-}
-
-func (i *Migrations) First() (version uint, ok bool) {
-	if len(i.index) == 0 {
-		return 0, false
-	}
-	return i.index[0], true
-}
-
-func (i *Migrations) Prev(version uint) (prevVersion uint, ok bool) {
-	pos := i.findPos(version)
-	if pos >= 1 && len(i.index) > pos-1 {
-		return i.index[pos-1], true
-	}
-	return 0, false
-}
-
-func (i *Migrations) Next(version uint) (nextVersion uint, ok bool) {
-	pos := i.findPos(version)
-	if pos >= 0 && len(i.index) > pos+1 {
-		return i.index[pos+1], true
-	}
-	return 0, false
-}
-
-func (i *Migrations) Up(version uint) (m *Migration, ok bool) {
-	if _, ok := i.migrations[version]; ok {
-		if mx, ok := i.migrations[version][Up]; ok {
+//Up get the up migration file
+func (i *Migrations) Up(identifier string) (m *Migration, ok bool) {
+	if _, ok := i.migrations[identifier]; ok {
+		if mx, ok := i.migrations[identifier][Up]; ok {
 			return mx, true
 		}
 	}
 	return nil, false
 }
 
-func (i *Migrations) Down(version uint) (m *Migration, ok bool) {
-	if _, ok := i.migrations[version]; ok {
-		if mx, ok := i.migrations[version][Down]; ok {
+//Down get the down migration file
+func (i *Migrations) Down(identifier string) (m *Migration, ok bool) {
+	if _, ok := i.migrations[identifier]; ok {
+		if mx, ok := i.migrations[identifier][Down]; ok {
 			return mx, true
 		}
 	}
 	return nil, false
 }
 
-func (i *Migrations) findPos(version uint) int {
-	if len(i.index) > 0 {
-		ix := i.index.Search(version)
-		if ix < len(i.index) && i.index[ix] == version {
-			return ix
-		}
-	}
-	return -1
+//GetAllIdentifier get all Identifier
+func (i *Migrations) GetAllIdentifier() (IdentifierSlice []string, err error) {
+	keys := make([]string, 0, len(i.migrations))
+    for k := range i.migrations {
+        keys = append(keys, k)
+    }
+	return keys, nil
 }
 
-type uintSlice []uint
+type stringSlice []string
 
-func (s uintSlice) Len() int {
+func (s stringSlice) Len() int {
 	return len(s)
 }
 
-func (s uintSlice) Swap(i, j int) {
+func (s stringSlice) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-func (s uintSlice) Less(i, j int) bool {
+func (s stringSlice) Less(i, j int) bool {
 	return s[i] < s[j]
 }
 
-func (s uintSlice) Search(x uint) int {
+func (s stringSlice) Search(x string) int {
 	return sort.Search(len(s), func(i int) bool { return s[i] >= x })
 }

@@ -6,6 +6,7 @@ import (
 	"reflect"
 
 	"github.com/golang-migrate/migrate/v4/database"
+	"github.com/golang-migrate/migrate/v4/source"
 )
 
 func init() {
@@ -92,4 +93,14 @@ func (s *Stub) Drop() error {
 
 func (s *Stub) EqualSequence(seq []string) bool {
 	return reflect.DeepEqual(seq, s.MigrationSequence)
+}
+
+// StoreMigration store migration file to DB
+func (s *Stub) StoreMigration(raw string, identifier string, direction source.Direction) error {
+	return nil
+}
+
+// IsMigrationExist check whether a migration file is imported
+func (s *Stub) IsMigrationExist(identifier string, direction source.Direction) (ret bool, err error) {
+	return false, nil
 }

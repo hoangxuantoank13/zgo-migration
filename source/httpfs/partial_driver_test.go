@@ -92,16 +92,3 @@ func TestPartialDriverInit(t *testing.T) {
 	}
 
 }
-
-func TestFirstWithNoMigrations(t *testing.T) {
-	var d driver
-	fs := http.Dir("testdata/no-migrations")
-
-	if err := d.Init(fs, ""); err != nil {
-		t.Errorf("No error on Init() expected, got: %v", err)
-	}
-
-	if _, err := d.First(); err == nil {
-		t.Errorf("Expected error on First(), got: %v", err)
-	}
-}

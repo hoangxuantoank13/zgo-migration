@@ -19,17 +19,20 @@ func init() {
 	source.Register("s3", &s3Driver{})
 }
 
+//s3Driver is struct of source
 type s3Driver struct {
 	s3client   s3iface.S3API
 	config     *Config
 	migrations *source.Migrations
 }
 
+//Config is config of source
 type Config struct {
 	Bucket string
 	Prefix string
 }
 
+// Open is part of source.Driver interface implementation.
 func (s *s3Driver) Open(folder string) (source.Driver, error) {
 	config, err := parseURI(folder)
 	if err != nil {
@@ -44,6 +47,7 @@ func (s *s3Driver) Open(folder string) (source.Driver, error) {
 	return WithInstance(s3.New(sess), config)
 }
 
+//WithInstance return instance of source
 func WithInstance(s3client s3iface.S3API, config *Config) (source.Driver, error) {
 	driver := &s3Driver{
 		config:     config,
@@ -97,43 +101,22 @@ func (s *s3Driver) loadMigrations() error {
 	return nil
 }
 
+// Close is part of source.Driver interface implementation.
 func (s *s3Driver) Close() error {
 	return nil
 }
 
-func (s *s3Driver) First() (uint, error) {
-	v, ok := s.migrations.First()
-	if !ok {
-		return 0, os.ErrNotExist
-	}
-	return v, nil
-}
-
-func (s *s3Driver) Prev(version uint) (uint, error) {
-	v, ok := s.migrations.Prev(version)
-	if !ok {
-		return 0, os.ErrNotExist
-	}
-	return v, nil
-}
-
-func (s *s3Driver) Next(version uint) (uint, error) {
-	v, ok := s.migrations.Next(version)
-	if !ok {
-		return 0, os.ErrNotExist
-	}
-	return v, nil
-}
-
-func (s *s3Driver) ReadUp(version uint) (io.ReadCloser, string, error) {
-	if m, ok := s.migrations.Up(version); ok {
+// ReadUp is part of source.Driver interface implementation.
+func (s *s3Driver) ReadUp(identifier string) (io.ReadCloser, string, error) {
+	if m, ok := s.migrations.Up(identifier); ok {
 		return s.open(m)
 	}
 	return nil, "", os.ErrNotExist
 }
 
-func (s *s3Driver) ReadDown(version uint) (io.ReadCloser, string, error) {
-	if m, ok := s.migrations.Down(version); ok {
+// ReadDown is part of source.Driver interface implementation.
+func (s *s3Driver) ReadDown(identifier string) (io.ReadCloser, string, error) {
+	if m, ok := s.migrations.Down(identifier); ok {
 		return s.open(m)
 	}
 	return nil, "", os.ErrNotExist
@@ -148,5 +131,10 @@ func (s *s3Driver) open(m *source.Migration) (io.ReadCloser, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
-	return object.Body, m.Identifier, nil
+	return object.Body, m.Raw, nil
+}
+
+// GetAllSource is part of source.Driver interface implementation.
+func (s *s3Driver) GetAllSource() (identifierSlice []string, err error) {
+	return s.migrations.GetAllIdentifier()
 }

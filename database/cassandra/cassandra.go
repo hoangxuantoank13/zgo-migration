@@ -12,6 +12,7 @@ import (
 
 	"github.com/gocql/gocql"
 	"github.com/golang-migrate/migrate/v4/database"
+	"github.com/golang-migrate/migrate/v4/source"
 	"github.com/hashicorp/go-multierror"
 )
 
@@ -20,8 +21,10 @@ func init() {
 	database.Register("cassandra", db)
 }
 
+//DefaultMigrationsTable is default Migrations table
 var DefaultMigrationsTable = "schema_migrations"
 
+//Error const
 var (
 	ErrNilConfig     = errors.New("no config")
 	ErrNoKeyspace    = errors.New("no keyspace provided")
@@ -29,12 +32,14 @@ var (
 	ErrClosedSession = errors.New("session is closed")
 )
 
+//Config is config of DB
 type Config struct {
 	MigrationsTable       string
 	KeyspaceName          string
 	MultiStatementEnabled bool
 }
 
+//Cassandra is struct of DB
 type Cassandra struct {
 	session  *gocql.Session
 	isLocked bool
@@ -43,6 +48,7 @@ type Cassandra struct {
 	config *Config
 }
 
+// WithInstance instance must have `multiStatements` set to true
 func WithInstance(session *gocql.Session, config *Config) (database.Driver, error) {
 	if config == nil {
 		return nil, ErrNilConfig
@@ -70,6 +76,7 @@ func WithInstance(session *gocql.Session, config *Config) (database.Driver, erro
 	return c, nil
 }
 
+// Open is part of database.Driver interface implementation.
 func (c *Cassandra) Open(url string) (database.Driver, error) {
 	u, err := nurl.Parse(url)
 	if err != nil {
@@ -146,11 +153,13 @@ func (c *Cassandra) Open(url string) (database.Driver, error) {
 	})
 }
 
+// Close is part of database.Driver interface implementation.
 func (c *Cassandra) Close() error {
 	c.session.Close()
 	return nil
 }
 
+// Lock is part of database.Driver interface implementation.
 func (c *Cassandra) Lock() error {
 	if c.isLocked {
 		return database.ErrLocked
@@ -159,11 +168,13 @@ func (c *Cassandra) Lock() error {
 	return nil
 }
 
+// Unlock is part of database.Driver interface implementation.
 func (c *Cassandra) Unlock() error {
 	c.isLocked = false
 	return nil
 }
 
+// Run is part of database.Driver interface implementation.
 func (c *Cassandra) Run(migration io.Reader) error {
 	migr, err := ioutil.ReadAll(migration)
 	if err != nil {
@@ -196,6 +207,7 @@ func (c *Cassandra) Run(migration io.Reader) error {
 	return nil
 }
 
+// SetVersion set the version
 func (c *Cassandra) SetVersion(version int, dirty bool) error {
 	query := `TRUNCATE "` + c.config.MigrationsTable + `"`
 	if err := c.session.Query(query).Exec(); err != nil {
@@ -211,7 +223,7 @@ func (c *Cassandra) SetVersion(version int, dirty bool) error {
 	return nil
 }
 
-// Return current keyspace version
+// Version Return current keyspace version
 func (c *Cassandra) Version() (version int, dirty bool, err error) {
 	query := `SELECT version, dirty FROM "` + c.config.MigrationsTable + `" LIMIT 1`
 	err = c.session.Query(query).Scan(&version, &dirty)
@@ -230,6 +242,7 @@ func (c *Cassandra) Version() (version int, dirty bool, err error) {
 	}
 }
 
+// Drop is part of database.Driver interface implementation.
 func (c *Cassandra) Drop() error {
 	// select all tables in current schema
 	query := fmt.Sprintf(`SELECT table_name from system_schema.tables WHERE keyspace_name='%s'`, c.config.KeyspaceName)
@@ -263,7 +276,7 @@ func (c *Cassandra) ensureVersionTable() (err error) {
 		}
 	}()
 
-	err = c.session.Query(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (version bigint, dirty boolean, PRIMARY KEY(version))", c.config.MigrationsTable)).Exec()
+	err = c.session.Query(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (version text, dirty boolean, PRIMARY KEY(version))", c.config.MigrationsTable)).Exec()
 	if err != nil {
 		return err
 	}
@@ -288,4 +301,14 @@ func parseConsistency(consistencyStr string) (consistency gocql.Consistency, err
 	consistency = gocql.ParseConsistency(consistencyStr)
 
 	return consistency, nil
+}
+
+// StoreMigration store migration file to DB
+func (c *Cassandra) StoreMigration(raw string, identifier string, direction source.Direction) error {
+	return nil
+}
+
+// IsMigrationExist check whether a migration file is imported
+func (c *Cassandra) IsMigrationExist(identifier string, direction source.Direction) (ret bool, err error) {
+	return false, nil
 }

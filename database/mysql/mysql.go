@@ -13,23 +13,21 @@ import (
 	nurl "net/url"
 	"strconv"
 	"strings"
-)
 
-import (
 	"github.com/go-sql-driver/mysql"
-	"github.com/hashicorp/go-multierror"
-)
-
-import (
 	"github.com/golang-migrate/migrate/v4/database"
+	"github.com/golang-migrate/migrate/v4/source"
+	"github.com/hashicorp/go-multierror"
 )
 
 func init() {
 	database.Register("mysql", &Mysql{})
 }
 
+//DefaultMigrationsTable is default Migrations table
 var DefaultMigrationsTable = "schema_migrations"
 
+//Error const
 var (
 	ErrDatabaseDirty    = fmt.Errorf("database is dirty")
 	ErrNilConfig        = fmt.Errorf("no config")
@@ -38,11 +36,13 @@ var (
 	ErrTLSCertKeyConfig = fmt.Errorf("To use TLS client authentication, both x-tls-cert and x-tls-key must not be empty")
 )
 
+//Config is config of DB
 type Config struct {
 	MigrationsTable string
 	DatabaseName    string
 }
 
+//Mysql is struct of DB
 type Mysql struct {
 	// mysql RELEASE_LOCK must be called from the same conn, so
 	// just do everything over a single conn anyway.
@@ -53,7 +53,7 @@ type Mysql struct {
 	config *Config
 }
 
-// instance must have `multiStatements` set to true
+// WithInstance instance must have `multiStatements` set to true
 func WithInstance(instance *sql.DB, config *Config) (database.Driver, error) {
 	if config == nil {
 		return nil, ErrNilConfig
@@ -188,6 +188,7 @@ func urlToMySQLConfig(url string) (*mysql.Config, error) {
 	return config, nil
 }
 
+// Open is part of database.Driver interface implementation.
 func (m *Mysql) Open(url string) (database.Driver, error) {
 	config, err := urlToMySQLConfig(url)
 	if err != nil {
@@ -215,6 +216,7 @@ func (m *Mysql) Open(url string) (database.Driver, error) {
 	return mx, nil
 }
 
+// Close is part of database.Driver interface implementation.
 func (m *Mysql) Close() error {
 	connErr := m.conn.Close()
 	dbErr := m.db.Close()
@@ -224,6 +226,7 @@ func (m *Mysql) Close() error {
 	return nil
 }
 
+// Lock is part of database.Driver interface implementation.
 func (m *Mysql) Lock() error {
 	if m.isLocked {
 		return database.ErrLocked
@@ -249,6 +252,7 @@ func (m *Mysql) Lock() error {
 	return database.ErrLocked
 }
 
+// Unlock is part of database.Driver interface implementation.
 func (m *Mysql) Unlock() error {
 	if !m.isLocked {
 		return nil
@@ -273,6 +277,7 @@ func (m *Mysql) Unlock() error {
 	return nil
 }
 
+// Run is part of database.Driver interface implementation.
 func (m *Mysql) Run(migration io.Reader) error {
 	migr, err := ioutil.ReadAll(migration)
 	if err != nil {
@@ -287,6 +292,52 @@ func (m *Mysql) Run(migration io.Reader) error {
 	return nil
 }
 
+// StoreMigration store migration file to DB
+func (m *Mysql) StoreMigration(raw string, identifier string, direction source.Direction) error {
+	tx, err := m.conn.BeginTx(context.Background(), &sql.TxOptions{})
+	if err != nil {
+		return &database.Error{OrigErr: err, Err: "transaction start failed"}
+	}
+
+	if raw != "" {
+		query := "INSERT INTO `" + m.config.MigrationsTable + "` (raw, identifier, direction) VALUES (?, ?, ?)"
+		if _, err := tx.ExecContext(context.Background(), query, raw, identifier, direction); err != nil {
+			if errRollback := tx.Rollback(); errRollback != nil {
+				err = multierror.Append(err, errRollback)
+			}
+			return &database.Error{OrigErr: err, Query: []byte(query)}
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		return &database.Error{OrigErr: err, Err: "transaction commit failed"}
+	}
+
+	return nil
+}
+// IsMigrationExist check whether a migration file is imported
+func (m *Mysql) IsMigrationExist(identifier string, direction source.Direction) (ret bool, err error) {
+	raw := ""
+	query := "SELECT raw FROM `" + m.config.MigrationsTable + "`" +
+			 "WHERE identifier = ? AND direction = ?"
+	err = m.conn.QueryRowContext(context.Background(), query, identifier, direction).Scan(&raw)
+	switch {
+	case err == sql.ErrNoRows:
+		return false, nil
+
+	case err != nil:
+		if e, ok := err.(*mysql.MySQLError); ok {
+			if e.Number == 0 {
+				return false, err
+			}
+		}
+		return false, &database.Error{OrigErr: err, Query: []byte(query)}
+
+	default:
+		return true, nil
+	}
+}
+
+/*
 func (m *Mysql) SetVersion(version int, dirty bool) error {
 	tx, err := m.conn.BeginTx(context.Background(), &sql.TxOptions{})
 	if err != nil {
@@ -337,7 +388,9 @@ func (m *Mysql) Version() (version int, dirty bool, err error) {
 		return version, dirty, nil
 	}
 }
+*/
 
+// Drop drops DB
 func (m *Mysql) Drop() (err error) {
 	// select all tables
 	query := `SHOW TABLES LIKE '%'`
@@ -417,7 +470,15 @@ func (m *Mysql) ensureVersionTable() (err error) {
 	}
 
 	// if not, create the empty migration table
-	query = "CREATE TABLE `" + m.config.MigrationsTable + "` (version bigint not null primary key, dirty boolean not null)"
+	//query = "CREATE TABLE `" + m.config.MigrationsTable + "` (version bigint not null primary key, dirty boolean not null)"
+	query = "CREATE TABLE `" + m.config.MigrationsTable + "` (" + 
+		"`id_" + m.config.MigrationsTable + "` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id of the schema update'," +
+		"`raw` varchar(255) NOT NULL COMMENT 'File name of the migration import to database.'," +
+		"`identifier` varchar(255) NOT NULL COMMENT 'Identifier of the migration import to database.'," +
+		"`direction` varchar(255) NOT NULL COMMENT 'Direction of the migration import to database.'," +
+		"`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Date time when the migration ran.'," +
+		"PRIMARY KEY (`id_" + m.config.MigrationsTable + "`)" +
+	  ") ENGINE=InnoDB AUTO_INCREMENT=2458 DEFAULT CHARSET=utf8"
 	if _, err := m.conn.ExecContext(context.Background(), query); err != nil {
 		return &database.Error{OrigErr: err, Query: []byte(query)}
 	}

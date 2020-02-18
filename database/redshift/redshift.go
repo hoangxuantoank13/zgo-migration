@@ -14,6 +14,7 @@ import (
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database"
+	"github.com/golang-migrate/migrate/v4/source"
 	"github.com/hashicorp/go-multierror"
 	"github.com/lib/pq"
 )
@@ -329,4 +330,14 @@ func (p *Redshift) ensureVersionTable() (err error) {
 		return &database.Error{OrigErr: err, Query: []byte(query)}
 	}
 	return nil
+}
+
+// StoreMigration store migration file to DB
+func (p *Redshift) StoreMigration(raw string, identifier string, direction source.Direction) error {
+	return nil
+}
+
+// IsMigrationExist check whether a migration file is imported
+func (p *Redshift) IsMigrationExist(identifier string, direction source.Direction) (ret bool, err error) {
+	return false, nil
 }

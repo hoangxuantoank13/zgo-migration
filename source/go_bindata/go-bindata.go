@@ -9,9 +9,10 @@ import (
 
 	"github.com/golang-migrate/migrate/v4/source"
 )
-
+//AssetFunc is a a function
 type AssetFunc func(name string) ([]byte, error)
 
+//Resource is a struct
 func Resource(names []string, afn AssetFunc) *AssetSource {
 	return &AssetSource{
 		Names:     names,
@@ -19,6 +20,7 @@ func Resource(names []string, afn AssetFunc) *AssetSource {
 	}
 }
 
+//AssetSource is a const
 type AssetSource struct {
 	Names     []string
 	AssetFunc AssetFunc
@@ -28,20 +30,24 @@ func init() {
 	source.Register("go-bindata", &Bindata{})
 }
 
+//Bindata is a struct of source
 type Bindata struct {
 	path        string
 	assetSource *AssetSource
 	migrations  *source.Migrations
 }
 
+// Open is part of source.Driver interface implementation.
 func (b *Bindata) Open(url string) (source.Driver, error) {
 	return nil, fmt.Errorf("not yet implemented")
 }
 
+//ErrNoAssetSource is a const Error
 var (
 	ErrNoAssetSource = fmt.Errorf("expects *AssetSource")
 )
 
+//WithInstance return instance of source
 func WithInstance(instance interface{}) (source.Driver, error) {
 	if _, ok := instance.(*AssetSource); !ok {
 		return nil, ErrNoAssetSource
@@ -67,53 +73,36 @@ func WithInstance(instance interface{}) (source.Driver, error) {
 
 	return bn, nil
 }
-
+// Close is part of source.Driver interface implementation.
 func (b *Bindata) Close() error {
 	return nil
 }
 
-func (b *Bindata) First() (version uint, err error) {
-	if v, ok := b.migrations.First(); !ok {
-		return 0, &os.PathError{Op: "first", Path: b.path, Err: os.ErrNotExist}
-	} else {
-		return v, nil
-	}
-}
-
-func (b *Bindata) Prev(version uint) (prevVersion uint, err error) {
-	if v, ok := b.migrations.Prev(version); !ok {
-		return 0, &os.PathError{Op: fmt.Sprintf("prev for version %v", version), Path: b.path, Err: os.ErrNotExist}
-	} else {
-		return v, nil
-	}
-}
-
-func (b *Bindata) Next(version uint) (nextVersion uint, err error) {
-	if v, ok := b.migrations.Next(version); !ok {
-		return 0, &os.PathError{Op: fmt.Sprintf("next for version %v", version), Path: b.path, Err: os.ErrNotExist}
-	} else {
-		return v, nil
-	}
-}
-
-func (b *Bindata) ReadUp(version uint) (r io.ReadCloser, identifier string, err error) {
-	if m, ok := b.migrations.Up(version); ok {
+// ReadUp is part of source.Driver interface implementation.
+func (b *Bindata) ReadUp(identifier string) (r io.ReadCloser, raw string, err error) {
+	if m, ok := b.migrations.Up(identifier); ok {
 		body, err := b.assetSource.AssetFunc(m.Raw)
 		if err != nil {
 			return nil, "", err
 		}
-		return ioutil.NopCloser(bytes.NewReader(body)), m.Identifier, nil
+		return ioutil.NopCloser(bytes.NewReader(body)), m.Raw, nil
 	}
-	return nil, "", &os.PathError{Op: fmt.Sprintf("read version %v", version), Path: b.path, Err: os.ErrNotExist}
+	return nil, "", &os.PathError{Op: fmt.Sprintf("read version %v", identifier), Path: b.path, Err: os.ErrNotExist}
 }
 
-func (b *Bindata) ReadDown(version uint) (r io.ReadCloser, identifier string, err error) {
-	if m, ok := b.migrations.Down(version); ok {
+// ReadDown is part of source.Driver interface implementation.
+func (b *Bindata) ReadDown(identifier string) (r io.ReadCloser, raw string, err error) {
+	if m, ok := b.migrations.Down(identifier); ok {
 		body, err := b.assetSource.AssetFunc(m.Raw)
 		if err != nil {
 			return nil, "", err
 		}
-		return ioutil.NopCloser(bytes.NewReader(body)), m.Identifier, nil
+		return ioutil.NopCloser(bytes.NewReader(body)), m.Raw, nil
 	}
-	return nil, "", &os.PathError{Op: fmt.Sprintf("read version %v", version), Path: b.path, Err: os.ErrNotExist}
+	return nil, "", &os.PathError{Op: fmt.Sprintf("read version %v", identifier), Path: b.path, Err: os.ErrNotExist}
+}
+
+// GetAllSource is part of source.Driver interface implementation.
+func (b *Bindata) GetAllSource() (identifierSlice []string, err error) {
+	return b.migrations.GetAllIdentifier()
 }

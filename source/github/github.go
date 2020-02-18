@@ -20,6 +20,7 @@ func init() {
 	source.Register("github", &Github{})
 }
 
+//Error const
 var (
 	ErrNoUserInfo          = fmt.Errorf("no username:token provided")
 	ErrNoAccessToken       = fmt.Errorf("no access token")
@@ -28,6 +29,7 @@ var (
 	ErrNoDir               = fmt.Errorf("no directory")
 )
 
+//Github is struct of source
 type Github struct {
 	config     *Config
 	client     *github.Client
@@ -35,6 +37,7 @@ type Github struct {
 	migrations *source.Migrations
 }
 
+//Config is config of source
 type Config struct {
 	Owner string
 	Repo  string
@@ -42,6 +45,7 @@ type Config struct {
 	Ref   string
 }
 
+// Open is part of source.Driver interface implementation.
 func (g *Github) Open(url string) (source.Driver, error) {
 	u, err := nurl.Parse(url)
 	if err != nil {
@@ -88,6 +92,7 @@ func (g *Github) Open(url string) (source.Driver, error) {
 	return gn, nil
 }
 
+//WithInstance return instance of source
 func WithInstance(client *github.Client, config *Config) (source.Driver, error) {
 	gn := &Github{
 		client:     client,
@@ -140,44 +145,16 @@ func (g *Github) ensureFields() {
 	}
 }
 
+// Close is part of source.Driver interface implementation.
 func (g *Github) Close() error {
 	return nil
 }
 
-func (g *Github) First() (version uint, er error) {
+// ReadUp is part of source.Driver interface implementation.
+func (g *Github) ReadUp(identifier string) (r io.ReadCloser, raw string, err error) {
 	g.ensureFields()
 
-	if v, ok := g.migrations.First(); !ok {
-		return 0, &os.PathError{Op: "first", Path: g.config.Path, Err: os.ErrNotExist}
-	} else {
-		return v, nil
-	}
-}
-
-func (g *Github) Prev(version uint) (prevVersion uint, err error) {
-	g.ensureFields()
-
-	if v, ok := g.migrations.Prev(version); !ok {
-		return 0, &os.PathError{Op: fmt.Sprintf("prev for version %v", version), Path: g.config.Path, Err: os.ErrNotExist}
-	} else {
-		return v, nil
-	}
-}
-
-func (g *Github) Next(version uint) (nextVersion uint, err error) {
-	g.ensureFields()
-
-	if v, ok := g.migrations.Next(version); !ok {
-		return 0, &os.PathError{Op: fmt.Sprintf("next for version %v", version), Path: g.config.Path, Err: os.ErrNotExist}
-	} else {
-		return v, nil
-	}
-}
-
-func (g *Github) ReadUp(version uint) (r io.ReadCloser, identifier string, err error) {
-	g.ensureFields()
-
-	if m, ok := g.migrations.Up(version); ok {
+	if m, ok := g.migrations.Up(identifier); ok {
 		file, _, _, err := g.client.Repositories.GetContents(
 			context.Background(),
 			g.config.Owner,
@@ -194,16 +171,17 @@ func (g *Github) ReadUp(version uint) (r io.ReadCloser, identifier string, err e
 			if err != nil {
 				return nil, "", err
 			}
-			return ioutil.NopCloser(strings.NewReader(r)), m.Identifier, nil
+			return ioutil.NopCloser(strings.NewReader(r)), m.Raw, nil
 		}
 	}
-	return nil, "", &os.PathError{Op: fmt.Sprintf("read version %v", version), Path: g.config.Path, Err: os.ErrNotExist}
+	return nil, "", &os.PathError{Op: fmt.Sprintf("read version %v", identifier), Path: g.config.Path, Err: os.ErrNotExist}
 }
 
-func (g *Github) ReadDown(version uint) (r io.ReadCloser, identifier string, err error) {
+// ReadDown is part of source.Driver interface implementation.
+func (g *Github) ReadDown(identifier string) (r io.ReadCloser, raw string, err error) {
 	g.ensureFields()
 
-	if m, ok := g.migrations.Down(version); ok {
+	if m, ok := g.migrations.Down(identifier); ok {
 		file, _, _, err := g.client.Repositories.GetContents(
 			context.Background(),
 			g.config.Owner,
@@ -220,8 +198,13 @@ func (g *Github) ReadDown(version uint) (r io.ReadCloser, identifier string, err
 			if err != nil {
 				return nil, "", err
 			}
-			return ioutil.NopCloser(strings.NewReader(r)), m.Identifier, nil
+			return ioutil.NopCloser(strings.NewReader(r)), m.Raw, nil
 		}
 	}
-	return nil, "", &os.PathError{Op: fmt.Sprintf("read version %v", version), Path: g.config.Path, Err: os.ErrNotExist}
+	return nil, "", &os.PathError{Op: fmt.Sprintf("read version %v", identifier), Path: g.config.Path, Err: os.ErrNotExist}
+}
+
+// GetAllSource is part of source.Driver interface implementation.
+func (g *Github) GetAllSource() (identifierSlice []string, err error) {
+	return g.migrations.GetAllIdentifier()
 }

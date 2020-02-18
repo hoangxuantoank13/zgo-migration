@@ -18,12 +18,14 @@ func init() {
 	source.Register("gcs", &gcs{})
 }
 
+//gcs is a struct of source
 type gcs struct {
 	bucket     *storage.BucketHandle
 	prefix     string
 	migrations *source.Migrations
 }
 
+// Open is part of source.Driver interface implementation.
 func (g *gcs) Open(folder string) (source.Driver, error) {
 	u, err := url.Parse(folder)
 	if err != nil {
@@ -67,43 +69,22 @@ func (g *gcs) loadMigrations() error {
 	return nil
 }
 
+// Close is part of source.Driver interface implementation.
 func (g *gcs) Close() error {
 	return nil
 }
 
-func (g *gcs) First() (uint, error) {
-	v, ok := g.migrations.First()
-	if !ok {
-		return 0, os.ErrNotExist
-	}
-	return v, nil
-}
-
-func (g *gcs) Prev(version uint) (uint, error) {
-	v, ok := g.migrations.Prev(version)
-	if !ok {
-		return 0, os.ErrNotExist
-	}
-	return v, nil
-}
-
-func (g *gcs) Next(version uint) (uint, error) {
-	v, ok := g.migrations.Next(version)
-	if !ok {
-		return 0, os.ErrNotExist
-	}
-	return v, nil
-}
-
-func (g *gcs) ReadUp(version uint) (io.ReadCloser, string, error) {
-	if m, ok := g.migrations.Up(version); ok {
+// ReadUp is part of source.Driver interface implementation.
+func (g *gcs) ReadUp(identifier string) (io.ReadCloser, string, error) {
+	if m, ok := g.migrations.Up(identifier); ok {
 		return g.open(m)
 	}
 	return nil, "", os.ErrNotExist
 }
 
-func (g *gcs) ReadDown(version uint) (io.ReadCloser, string, error) {
-	if m, ok := g.migrations.Down(version); ok {
+// ReadDown is part of source.Driver interface implementation.
+func (g *gcs) ReadDown(identifier string) (io.ReadCloser, string, error) {
+	if m, ok := g.migrations.Down(identifier); ok {
 		return g.open(m)
 	}
 	return nil, "", os.ErrNotExist
@@ -115,5 +96,10 @@ func (g *gcs) open(m *source.Migration) (io.ReadCloser, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
-	return reader, m.Identifier, nil
+	return reader, m.Raw, nil
+}
+
+// GetAllSource is part of source.Driver interface implementation.
+func (g *gcs) GetAllSource() (identifierSlice []string, err error) {
+	return g.migrations.GetAllIdentifier()
 }

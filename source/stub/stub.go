@@ -14,26 +14,32 @@ func init() {
 	source.Register("stub", &Stub{})
 }
 
+//Config is config of source
 type Config struct{}
 
 // d, _ := source.Open("stub://")
 // d.(*stub.Stub).Migrations =
 
+//Stub is source
 type Stub struct {
-	Url        string
+	URL        string
 	Instance   interface{}
 	Migrations *source.Migrations
 	Config     *Config
 }
 
+// Open returns a a new driver instance configured with parameters
+// coming from the URL string. Migrate will call this function
+// only once per instance.
 func (s *Stub) Open(url string) (source.Driver, error) {
 	return &Stub{
-		Url:        url,
+		URL:        url,
 		Migrations: source.NewMigrations(),
 		Config:     &Config{},
 	}, nil
 }
 
+//WithInstance return Stub instance
 func WithInstance(instance interface{}, config *Config) (source.Driver, error) {
 	return &Stub{
 		Instance:   instance,
@@ -42,44 +48,29 @@ func WithInstance(instance interface{}, config *Config) (source.Driver, error) {
 	}, nil
 }
 
+// Close closes the underlying source instance managed by the driver.
+// Migrate will call this function only once per instance.
 func (s *Stub) Close() error {
 	return nil
 }
 
-func (s *Stub) First() (version uint, err error) {
-	if v, ok := s.Migrations.First(); !ok {
-		return 0, &os.PathError{Op: "first", Path: s.Url, Err: os.ErrNotExist} // TODO: s.Url can be empty when called with WithInstance
-	} else {
-		return v, nil
+// ReadUp is part of source.Driver interface implementation.
+func (s *Stub) ReadUp(identifier string) (r io.ReadCloser, raw string, err error) {
+	if m, ok := s.Migrations.Up(identifier); ok {
+		return ioutil.NopCloser(bytes.NewBufferString(m.Identifier)), fmt.Sprintf("%v.up.stub", identifier), nil
 	}
+	return nil, "", &os.PathError{Op: fmt.Sprintf("read up version %v", identifier), Path: s.URL, Err: os.ErrNotExist}
 }
 
-func (s *Stub) Prev(version uint) (prevVersion uint, err error) {
-	if v, ok := s.Migrations.Prev(version); !ok {
-		return 0, &os.PathError{Op: fmt.Sprintf("prev for version %v", version), Path: s.Url, Err: os.ErrNotExist}
-	} else {
-		return v, nil
+// ReadDown is part of source.Driver interface implementation.
+func (s *Stub) ReadDown(identifier string) (r io.ReadCloser, raw string, err error) {
+	if m, ok := s.Migrations.Down(identifier); ok {
+		return ioutil.NopCloser(bytes.NewBufferString(m.Identifier)), fmt.Sprintf("%v.down.stub", identifier), nil
 	}
+	return nil, "", &os.PathError{Op: fmt.Sprintf("read down version %v", identifier), Path: s.URL, Err: os.ErrNotExist}
 }
 
-func (s *Stub) Next(version uint) (nextVersion uint, err error) {
-	if v, ok := s.Migrations.Next(version); !ok {
-		return 0, &os.PathError{Op: fmt.Sprintf("next for version %v", version), Path: s.Url, Err: os.ErrNotExist}
-	} else {
-		return v, nil
-	}
-}
-
-func (s *Stub) ReadUp(version uint) (r io.ReadCloser, identifier string, err error) {
-	if m, ok := s.Migrations.Up(version); ok {
-		return ioutil.NopCloser(bytes.NewBufferString(m.Identifier)), fmt.Sprintf("%v.up.stub", version), nil
-	}
-	return nil, "", &os.PathError{Op: fmt.Sprintf("read up version %v", version), Path: s.Url, Err: os.ErrNotExist}
-}
-
-func (s *Stub) ReadDown(version uint) (r io.ReadCloser, identifier string, err error) {
-	if m, ok := s.Migrations.Down(version); ok {
-		return ioutil.NopCloser(bytes.NewBufferString(m.Identifier)), fmt.Sprintf("%v.down.stub", version), nil
-	}
-	return nil, "", &os.PathError{Op: fmt.Sprintf("read down version %v", version), Path: s.Url, Err: os.ErrNotExist}
+// GetAllSource is part of source.Driver interface implementation.
+func (s *Stub) GetAllSource() (identifierSlice []string, err error) {
+	return s.Migrations.GetAllIdentifier()
 }

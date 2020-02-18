@@ -16,6 +16,7 @@ import (
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database"
+	"github.com/golang-migrate/migrate/v4/source"
 
 	"github.com/hashicorp/go-multierror"
 	"google.golang.org/api/iterator"
@@ -315,4 +316,14 @@ func migrationStatements(migration []byte) []string {
 		}
 	}
 	return nonEmptyStatements
+}
+
+// StoreMigration store migration file to DB
+func (s *Spanner) StoreMigration(raw string, identifier string, direction source.Direction) error {
+	return nil
+}
+
+// IsMigrationExist check whether a migration file is imported
+func (s *Spanner) IsMigrationExist(identifier string, direction source.Direction) (ret bool, err error) {
+	return false, nil
 }

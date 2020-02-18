@@ -10,6 +10,7 @@ import (
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database"
+	"github.com/golang-migrate/migrate/v4/source"
 	"github.com/hashicorp/go-multierror"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -235,4 +236,14 @@ func (m *Sqlite) Version() (version int, dirty bool, err error) {
 		return database.NilVersion, false, nil
 	}
 	return version, dirty, nil
+}
+
+// StoreMigration store migration file to DB
+func (m *Sqlite) StoreMigration(raw string, identifier string, direction source.Direction) error {
+	return nil
+}
+
+// IsMigrationExist check whether a migration file is imported
+func (m *Sqlite) IsMigrationExist(identifier string, direction source.Direction) (ret bool, err error) {
+	return false, nil
 }

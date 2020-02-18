@@ -11,13 +11,17 @@ import (
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database"
+	"github.com/golang-migrate/migrate/v4/source"
 	"github.com/hashicorp/go-multierror"
 )
 
+// DefaultMigrationsTable is default Migrations table
 var DefaultMigrationsTable = "schema_migrations"
 
+// ErrNilConfig const
 var ErrNilConfig = fmt.Errorf("no config")
 
+// Config is config of DB
 type Config struct {
 	DatabaseName          string
 	MigrationsTable       string
@@ -28,6 +32,7 @@ func init() {
 	database.Register("clickhouse", &ClickHouse{})
 }
 
+// WithInstance return instance of DB
 func WithInstance(conn *sql.DB, config *Config) (database.Driver, error) {
 	if config == nil {
 		return nil, ErrNilConfig
@@ -49,11 +54,13 @@ func WithInstance(conn *sql.DB, config *Config) (database.Driver, error) {
 	return ch, nil
 }
 
+//ClickHouse is struct of DB
 type ClickHouse struct {
 	conn   *sql.DB
 	config *Config
 }
 
+// Open is part of database.Driver interface implementation.
 func (ch *ClickHouse) Open(dsn string) (database.Driver, error) {
 	purl, err := url.Parse(dsn)
 	if err != nil {
@@ -96,6 +103,7 @@ func (ch *ClickHouse) init() error {
 	return ch.ensureVersionTable()
 }
 
+// Run is part of database.Driver interface implementation.
 func (ch *ClickHouse) Run(r io.Reader) error {
 	migration, err := ioutil.ReadAll(r)
 	if err != nil {
@@ -123,6 +131,8 @@ func (ch *ClickHouse) Run(r io.Reader) error {
 
 	return nil
 }
+
+// Version is part of database.Driver interface implementation.
 func (ch *ClickHouse) Version() (int, bool, error) {
 	var (
 		version int
@@ -138,6 +148,7 @@ func (ch *ClickHouse) Version() (int, bool, error) {
 	return version, dirty == 1, nil
 }
 
+// SetVersion is part of database.Driver interface implementation.
 func (ch *ClickHouse) SetVersion(version int, dirty bool) error {
 	var (
 		bool = func(v bool) uint8 {
@@ -204,6 +215,7 @@ func (ch *ClickHouse) ensureVersionTable() (err error) {
 	return nil
 }
 
+// Drop is part of database.Driver interface implementation.
 func (ch *ClickHouse) Drop() (err error) {
 	query := "SHOW TABLES FROM " + ch.config.DatabaseName
 	tables, err := ch.conn.Query(query)
@@ -231,6 +243,21 @@ func (ch *ClickHouse) Drop() (err error) {
 	return nil
 }
 
+// Lock is part of database.Driver interface implementation.
 func (ch *ClickHouse) Lock() error   { return nil }
+
+// Unlock is part of database.Driver interface implementation.
 func (ch *ClickHouse) Unlock() error { return nil }
+
+// Close is part of database.Driver interface implementation.
 func (ch *ClickHouse) Close() error  { return ch.conn.Close() }
+
+// StoreMigration store migration file to DB
+func (ch *ClickHouse) StoreMigration(raw string, identifier string, direction source.Direction) error {
+	return nil
+}
+
+// IsMigrationExist check whether a migration file is imported
+func (ch *ClickHouse) IsMigrationExist(identifier string, direction source.Direction) (ret bool, err error) {
+	return false, nil
+}

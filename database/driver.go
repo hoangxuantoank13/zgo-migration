@@ -10,13 +10,16 @@ import (
 	"sync"
 
 	iurl "github.com/golang-migrate/migrate/v4/internal/url"
+	"github.com/golang-migrate/migrate/v4/source"
 )
 
+//Error const
 var (
 	ErrLocked    = fmt.Errorf("can't acquire lock")
 	ErrNotLocked = fmt.Errorf("can't unlock, as not currently locked")
 )
 
+//NilVersion Error const
 const NilVersion int = -1
 
 var driversMu sync.RWMutex
@@ -65,15 +68,11 @@ type Driver interface {
 	// Run applies a migration to the database. migration is guaranteed to be not nil.
 	Run(migration io.Reader) error
 
-	// SetVersion saves version and dirty state.
-	// Migrate will call this function before and after each call to Run.
-	// version must be >= -1. -1 means NilVersion.
-	SetVersion(version int, dirty bool) error
+	//StoreMigration store migration file to DB
+	StoreMigration(raw string, identifier string, direction source.Direction) error
 
-	// Version returns the currently active version and if the database is dirty.
-	// When no migration has been applied, it must return version -1.
-	// Dirty means, a previous migration failed and user interaction is required.
-	Version() (version int, dirty bool, err error)
+	//StoreMigration store migration file to DB
+	IsMigrationExist(identifier string, direction source.Direction) (bool, error)
 
 	// Drop deletes everything in the database.
 	// Note that this is a breaking action, a new call to Open() is necessary to

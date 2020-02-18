@@ -19,100 +19,30 @@ import (
 //
 // See source/stub/stub_test.go or source/file/file_test.go for an example.
 func Test(t *testing.T, d source.Driver) {
-	TestFirst(t, d)
-	TestPrev(t, d)
-	TestNext(t, d)
 	TestReadUp(t, d)
 	TestReadDown(t, d)
 }
 
-func TestFirst(t *testing.T, d source.Driver) {
-	version, err := d.First()
-	if err != nil {
-		t.Fatalf("First: expected err to be nil, got %v", err)
-	}
-	if version != 1 {
-		t.Errorf("First: expected 1, got %v", version)
-	}
-}
-
-func TestPrev(t *testing.T, d source.Driver) {
-	tt := []struct {
-		version           uint
-		expectErr         error
-		expectPrevVersion uint
-	}{
-		{version: 0, expectErr: os.ErrNotExist},
-		{version: 1, expectErr: os.ErrNotExist},
-		{version: 2, expectErr: os.ErrNotExist},
-		{version: 3, expectErr: nil, expectPrevVersion: 1},
-		{version: 4, expectErr: nil, expectPrevVersion: 3},
-		{version: 5, expectErr: nil, expectPrevVersion: 4},
-		{version: 6, expectErr: os.ErrNotExist},
-		{version: 7, expectErr: nil, expectPrevVersion: 5},
-		{version: 8, expectErr: os.ErrNotExist},
-		{version: 9, expectErr: os.ErrNotExist},
-	}
-
-	for i, v := range tt {
-		pv, err := d.Prev(v.version)
-		if (v.expectErr == os.ErrNotExist && !os.IsNotExist(err)) && v.expectErr != err {
-			t.Errorf("Prev: expected %v, got %v, in %v", v.expectErr, err, i)
-		}
-		if err == nil && v.expectPrevVersion != pv {
-			t.Errorf("Prev: expected %v, got %v, in %v", v.expectPrevVersion, pv, i)
-		}
-	}
-}
-
-func TestNext(t *testing.T, d source.Driver) {
-	tt := []struct {
-		version           uint
-		expectErr         error
-		expectNextVersion uint
-	}{
-		{version: 0, expectErr: os.ErrNotExist},
-		{version: 1, expectErr: nil, expectNextVersion: 3},
-		{version: 2, expectErr: os.ErrNotExist},
-		{version: 3, expectErr: nil, expectNextVersion: 4},
-		{version: 4, expectErr: nil, expectNextVersion: 5},
-		{version: 5, expectErr: nil, expectNextVersion: 7},
-		{version: 6, expectErr: os.ErrNotExist},
-		{version: 7, expectErr: os.ErrNotExist},
-		{version: 8, expectErr: os.ErrNotExist},
-		{version: 9, expectErr: os.ErrNotExist},
-	}
-
-	for i, v := range tt {
-		nv, err := d.Next(v.version)
-		if (v.expectErr == os.ErrNotExist && !os.IsNotExist(err)) && v.expectErr != err {
-			t.Errorf("Next: expected %v, got %v, in %v", v.expectErr, err, i)
-		}
-		if err == nil && v.expectNextVersion != nv {
-			t.Errorf("Next: expected %v, got %v, in %v", v.expectNextVersion, nv, i)
-		}
-	}
-}
-
+//TestReadUp is a testing
 func TestReadUp(t *testing.T, d source.Driver) {
 	tt := []struct {
-		version   uint
-		expectErr error
-		expectUp  bool
+		identifier string
+		expectErr  error
+		expectUp   bool
 	}{
-		{version: 0, expectErr: os.ErrNotExist},
-		{version: 1, expectErr: nil, expectUp: true},
-		{version: 2, expectErr: os.ErrNotExist},
-		{version: 3, expectErr: nil, expectUp: true},
-		{version: 4, expectErr: nil, expectUp: true},
-		{version: 5, expectErr: os.ErrNotExist},
-		{version: 6, expectErr: os.ErrNotExist},
-		{version: 7, expectErr: nil, expectUp: true},
-		{version: 8, expectErr: os.ErrNotExist},
+		{identifier: "0", expectErr: os.ErrNotExist},
+		{identifier: "1", expectErr: nil, expectUp: true},
+		{identifier: "2", expectErr: os.ErrNotExist},
+		{identifier: "3", expectErr: nil, expectUp: true},
+		{identifier: "4", expectErr: nil, expectUp: true},
+		{identifier: "5", expectErr: os.ErrNotExist},
+		{identifier: "6", expectErr: os.ErrNotExist},
+		{identifier: "7", expectErr: nil, expectUp: true},
+		{identifier: "8", expectErr: os.ErrNotExist},
 	}
 
 	for i, v := range tt {
-		up, identifier, err := d.ReadUp(v.version)
+		up, identifier, err := d.ReadUp(v.identifier)
 		if (v.expectErr == os.ErrNotExist && !os.IsNotExist(err)) ||
 			(v.expectErr != os.ErrNotExist && err != v.expectErr) {
 			t.Errorf("expected %v, got %v, in %v", v.expectErr, err, i)
@@ -131,25 +61,26 @@ func TestReadUp(t *testing.T, d source.Driver) {
 	}
 }
 
+//TestReadDown is a testing
 func TestReadDown(t *testing.T, d source.Driver) {
 	tt := []struct {
-		version    uint
+		identifier string
 		expectErr  error
 		expectDown bool
 	}{
-		{version: 0, expectErr: os.ErrNotExist},
-		{version: 1, expectErr: nil, expectDown: true},
-		{version: 2, expectErr: os.ErrNotExist},
-		{version: 3, expectErr: os.ErrNotExist},
-		{version: 4, expectErr: nil, expectDown: true},
-		{version: 5, expectErr: nil, expectDown: true},
-		{version: 6, expectErr: os.ErrNotExist},
-		{version: 7, expectErr: nil, expectDown: true},
-		{version: 8, expectErr: os.ErrNotExist},
+		{identifier: "0", expectErr: os.ErrNotExist},
+		{identifier: "1", expectErr: nil, expectDown: true},
+		{identifier: "2", expectErr: os.ErrNotExist},
+		{identifier: "3", expectErr: os.ErrNotExist},
+		{identifier: "4", expectErr: nil, expectDown: true},
+		{identifier: "5", expectErr: nil, expectDown: true},
+		{identifier: "6", expectErr: os.ErrNotExist},
+		{identifier: "7", expectErr: nil, expectDown: true},
+		{identifier: "8", expectErr: os.ErrNotExist},
 	}
 
 	for i, v := range tt {
-		down, identifier, err := d.ReadDown(v.version)
+		down, identifier, err := d.ReadDown(v.identifier)
 		if (v.expectErr == os.ErrNotExist && !os.IsNotExist(err)) ||
 			(v.expectErr != os.ErrNotExist && err != v.expectErr) {
 			t.Errorf("expected %v, got %v, in %v", v.expectErr, err, i)

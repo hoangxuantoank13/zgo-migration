@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"time"
+	"github.com/golang-migrate/migrate/v4/source"
 )
 
 // DefaultBufferSize sets the in memory buffer size (in Bytes) for every
@@ -19,13 +20,11 @@ type Migration struct {
 	// the migration in the source.
 	Identifier string
 
-	// Version is the version of this migration.
-	Version uint
+	// Direction is either Up or Down.
+	Direction source.Direction
 
-	// TargetVersion is the migration version after this migration
-	// has been applied to the database.
-	// Can be -1, implying that this is a NilVersion.
-	TargetVersion int
+	//Raw is the full file name
+	Raw string
 
 	// Body holds an io.ReadCloser to the source.
 	Body io.ReadCloser
@@ -74,12 +73,12 @@ type Migration struct {
 // last down migration, there is no next down migration, the targetVersion should
 // be nil. Nil in this case is represented by -1 (because type int).
 func NewMigration(body io.ReadCloser, identifier string,
-	version uint, targetVersion int) (*Migration, error) {
+	direction source.Direction, raw string) (*Migration, error) {
 	tnow := time.Now()
 	m := &Migration{
 		Identifier:    identifier,
-		Version:       version,
-		TargetVersion: targetVersion,
+		Direction:     direction,
+		Raw: 		   raw,
 		Scheduled:     tnow,
 	}
 
@@ -104,16 +103,16 @@ func NewMigration(body io.ReadCloser, identifier string,
 
 // String implements string.Stringer and is used in tests.
 func (m *Migration) String() string {
-	return fmt.Sprintf("%v [%v=>%v]", m.Identifier, m.Version, m.TargetVersion)
+	return fmt.Sprintf("%v", m.Identifier)
 }
 
 // LogString returns a string describing this migration to humans.
 func (m *Migration) LogString() string {
 	directionStr := "u"
-	if m.TargetVersion < int(m.Version) {
+	if m.Direction == source.Down {
 		directionStr = "d"
 	}
-	return fmt.Sprintf("%v/%v %v", m.Version, directionStr, m.Identifier)
+	return fmt.Sprintf("%v/%v %v", m.Identifier, directionStr, m.Raw)
 }
 
 // Buffer buffers Body up to BufferSize.

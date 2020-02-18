@@ -9,12 +9,13 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/golang-migrate/migrate/v4"
 	"io"
 	"strconv"
 	"strings"
 	"sync"
 	"testing"
+
+	"github.com/golang-migrate/migrate/v4"
 
 	"github.com/dhui/dktest"
 
@@ -198,74 +199,74 @@ func TestFilterCustomQuery(t *testing.T) {
 	})
 }
 
-func TestWithSchema(t *testing.T) {
-	dktesting.ParallelTest(t, specs, func(t *testing.T, c dktest.ContainerInfo) {
-		ip, port, err := c.FirstPort()
-		if err != nil {
-			t.Fatal(err)
-		}
+// func TestWithSchema(t *testing.T) {
+// 	dktesting.ParallelTest(t, specs, func(t *testing.T, c dktest.ContainerInfo) {
+// 		ip, port, err := c.FirstPort()
+// 		if err != nil {
+// 			t.Fatal(err)
+// 		}
 
-		addr := pgConnectionString(ip, port)
-		p := &Postgres{}
-		d, err := p.Open(addr)
-		if err != nil {
-			t.Fatal(err)
-		}
-		defer func() {
-			if err := d.Close(); err != nil {
-				t.Fatal(err)
-			}
-		}()
+// 		addr := pgConnectionString(ip, port)
+// 		p := &Postgres{}
+// 		d, err := p.Open(addr)
+// 		if err != nil {
+// 			t.Fatal(err)
+// 		}
+// 		defer func() {
+// 			if err := d.Close(); err != nil {
+// 				t.Fatal(err)
+// 			}
+// 		}()
 
-		// create foobar schema
-		if err := d.Run(strings.NewReader("CREATE SCHEMA foobar AUTHORIZATION postgres")); err != nil {
-			t.Fatal(err)
-		}
-		if err := d.SetVersion(1, false); err != nil {
-			t.Fatal(err)
-		}
+// 		// create foobar schema
+// 		if err := d.Run(strings.NewReader("CREATE SCHEMA foobar AUTHORIZATION postgres")); err != nil {
+// 			t.Fatal(err)
+// 		}
+// 		if err := d.SetVersion(1, false); err != nil {
+// 			t.Fatal(err)
+// 		}
 
-		// re-connect using that schema
-		d2, err := p.Open(fmt.Sprintf("postgres://postgres@%v:%v/postgres?sslmode=disable&search_path=foobar", ip, port))
-		if err != nil {
-			t.Fatal(err)
-		}
-		defer func() {
-			if err := d2.Close(); err != nil {
-				t.Fatal(err)
-			}
-		}()
+// 		// re-connect using that schema
+// 		d2, err := p.Open(fmt.Sprintf("postgres://postgres@%v:%v/postgres?sslmode=disable&search_path=foobar", ip, port))
+// 		if err != nil {
+// 			t.Fatal(err)
+// 		}
+// 		defer func() {
+// 			if err := d2.Close(); err != nil {
+// 				t.Fatal(err)
+// 			}
+// 		}()
 
-		version, _, err := d2.Version()
-		if err != nil {
-			t.Fatal(err)
-		}
-		if version != -1 {
-			t.Fatal("expected NilVersion")
-		}
+// 		version, _, err := d2.Version()
+// 		if err != nil {
+// 			t.Fatal(err)
+// 		}
+// 		if version != -1 {
+// 			t.Fatal("expected NilVersion")
+// 		}
 
-		// now update version and compare
-		if err := d2.SetVersion(2, false); err != nil {
-			t.Fatal(err)
-		}
-		version, _, err = d2.Version()
-		if err != nil {
-			t.Fatal(err)
-		}
-		if version != 2 {
-			t.Fatal("expected version 2")
-		}
+// 		// now update version and compare
+// 		if err := d2.SetVersion(2, false); err != nil {
+// 			t.Fatal(err)
+// 		}
+// 		version, _, err = d2.Version()
+// 		if err != nil {
+// 			t.Fatal(err)
+// 		}
+// 		if version != 2 {
+// 			t.Fatal("expected version 2")
+// 		}
 
-		// meanwhile, the public schema still has the other version
-		version, _, err = d.Version()
-		if err != nil {
-			t.Fatal(err)
-		}
-		if version != 1 {
-			t.Fatal("expected version 2")
-		}
-	})
-}
+// 		// meanwhile, the public schema still has the other version
+// 		version, _, err = d.Version()
+// 		if err != nil {
+// 			t.Fatal(err)
+// 		}
+// 		if version != 1 {
+// 			t.Fatal("expected version 2")
+// 		}
+// 	})
+// }
 
 func TestParallelSchema(t *testing.T) {
 	dktesting.ParallelTest(t, specs, func(t *testing.T, c dktest.ContainerInfo) {

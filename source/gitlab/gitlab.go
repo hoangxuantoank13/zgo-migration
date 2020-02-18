@@ -8,11 +8,8 @@ import (
 	"net/http"
 	nurl "net/url"
 	"os"
-	"strconv"
 	"strings"
-)
 
-import (
 	"github.com/golang-migrate/migrate/v4/source"
 	"github.com/xanzy/go-gitlab"
 )
@@ -21,6 +18,7 @@ func init() {
 	source.Register("gitlab", &Gitlab{})
 }
 
+//Error const
 var (
 	ErrNoUserInfo       = fmt.Errorf("no username:token provided")
 	ErrNoAccessToken    = fmt.Errorf("no access token")
@@ -29,6 +27,7 @@ var (
 	ErrInvalidResponse  = fmt.Errorf("invalid response")
 )
 
+//Gitlab is struct of source
 type Gitlab struct {
 	client *gitlab.Client
 	url    string
@@ -40,9 +39,11 @@ type Gitlab struct {
 	migrations  *source.Migrations
 }
 
+//Config is config of source
 type Config struct {
 }
 
+// Open is part of source.Driver interface implementation.
 func (g *Gitlab) Open(url string) (source.Driver, error) {
 	u, err := nurl.Parse(url)
 	if err != nil {
@@ -101,6 +102,7 @@ func (g *Gitlab) Open(url string) (source.Driver, error) {
 	return gn, nil
 }
 
+//WithInstance return instance of source
 func WithInstance(client *gitlab.Client, config *Config) (source.Driver, error) {
 	gn := &Gitlab{
 		client:     client,
@@ -138,51 +140,24 @@ func (g *Gitlab) readDirectory() error {
 
 func (g *Gitlab) nodeToMigration(node *gitlab.TreeNode) (*source.Migration, error) {
 	m := source.Regex.FindStringSubmatch(node.Name)
-	if len(m) == 5 {
-		versionUint64, err := strconv.ParseUint(m[1], 10, 64)
-		if err != nil {
-			return nil, err
-		}
+	if len(m) == 4 {
 		return &source.Migration{
-			Version:    uint(versionUint64),
-			Identifier: m[2],
-			Direction:  source.Direction(m[3]),
+			Identifier: m[1],
+			Direction:  source.Direction(m[2]),
 			Raw:        g.path + "/" + node.Name,
 		}, nil
 	}
 	return nil, source.ErrParse
 }
 
+// Close is part of source.Driver interface implementation.
 func (g *Gitlab) Close() error {
 	return nil
 }
 
-func (g *Gitlab) First() (version uint, er error) {
-	if v, ok := g.migrations.First(); !ok {
-		return 0, &os.PathError{Op: "first", Path: g.path, Err: os.ErrNotExist}
-	} else {
-		return v, nil
-	}
-}
-
-func (g *Gitlab) Prev(version uint) (prevVersion uint, err error) {
-	if v, ok := g.migrations.Prev(version); !ok {
-		return 0, &os.PathError{Op: fmt.Sprintf("prev for version %v", version), Path: g.path, Err: os.ErrNotExist}
-	} else {
-		return v, nil
-	}
-}
-
-func (g *Gitlab) Next(version uint) (nextVersion uint, err error) {
-	if v, ok := g.migrations.Next(version); !ok {
-		return 0, &os.PathError{Op: fmt.Sprintf("next for version %v", version), Path: g.path, Err: os.ErrNotExist}
-	} else {
-		return v, nil
-	}
-}
-
-func (g *Gitlab) ReadUp(version uint) (r io.ReadCloser, identifier string, err error) {
-	if m, ok := g.migrations.Up(version); ok {
+// ReadUp is part of source.Driver interface implementation.
+func (g *Gitlab) ReadUp(identifier string) (r io.ReadCloser, raw string, err error) {
+	if m, ok := g.migrations.Up(identifier); ok {
 		f, response, err := g.client.RepositoryFiles.GetFile(g.projectID, m.Raw, g.getOptions)
 		if err != nil {
 			return nil, "", err
@@ -197,14 +172,15 @@ func (g *Gitlab) ReadUp(version uint) (r io.ReadCloser, identifier string, err e
 			return nil, "", err
 		}
 
-		return ioutil.NopCloser(strings.NewReader(string(content))), m.Identifier, nil
+		return ioutil.NopCloser(strings.NewReader(string(content))), m.Raw, nil
 	}
 
-	return nil, "", &os.PathError{Op: fmt.Sprintf("read version %v", version), Path: g.path, Err: os.ErrNotExist}
+	return nil, "", &os.PathError{Op: fmt.Sprintf("read version %v", identifier), Path: g.path, Err: os.ErrNotExist}
 }
 
-func (g *Gitlab) ReadDown(version uint) (r io.ReadCloser, identifier string, err error) {
-	if m, ok := g.migrations.Down(version); ok {
+// ReadDown is part of source.Driver interface implementation.
+func (g *Gitlab) ReadDown(identifier string) (r io.ReadCloser, raw string, err error) {
+	if m, ok := g.migrations.Down(identifier); ok {
 		f, response, err := g.client.RepositoryFiles.GetFile(g.projectID, m.Raw, g.getOptions)
 		if err != nil {
 			return nil, "", err
@@ -219,8 +195,13 @@ func (g *Gitlab) ReadDown(version uint) (r io.ReadCloser, identifier string, err
 			return nil, "", err
 		}
 
-		return ioutil.NopCloser(strings.NewReader(string(content))), m.Identifier, nil
+		return ioutil.NopCloser(strings.NewReader(string(content))), m.Raw, nil
 	}
 
-	return nil, "", &os.PathError{Op: fmt.Sprintf("read version %v", version), Path: g.path, Err: os.ErrNotExist}
+	return nil, "", &os.PathError{Op: fmt.Sprintf("read version %v", identifier), Path: g.path, Err: os.ErrNotExist}
+}
+
+// GetAllSource is part of source.Driver interface implementation.
+func (g *Gitlab) GetAllSource() (identifierSlice []string, err error) {
+	return g.migrations.GetAllIdentifier()
 }

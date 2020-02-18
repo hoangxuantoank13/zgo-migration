@@ -1,5 +1,6 @@
 package migrate
 
+/*
 import (
 	"bytes"
 	"database/sql"
@@ -1414,3 +1415,4 @@ func equalDbSeq(t *testing.T, i int, expected migrationSequence, got *dStub.Stub
 		t.Fatalf("\nexpected sequence %v,\ngot               %v, in %v", bs, got.MigrationSequence, i)
 	}
 }
+*/

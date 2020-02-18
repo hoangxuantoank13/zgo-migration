@@ -6,13 +6,16 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database"
-	"github.com/hashicorp/go-multierror"
-	_ "github.com/nakagami/firebirdsql"
 	"io"
 	"io/ioutil"
 	nurl "net/url"
+
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database"
+	"github.com/golang-migrate/migrate/v4/source"
+	"github.com/hashicorp/go-multierror"
+	//
+	_ "github.com/nakagami/firebirdsql"
 )
 
 func init() {
@@ -21,17 +24,21 @@ func init() {
 	database.Register("firebirdsql", &db)
 }
 
+// DefaultMigrationsTable is default Migrations table
 var DefaultMigrationsTable = "schema_migrations"
 
+// Error const
 var (
 	ErrNilConfig = fmt.Errorf("no config")
 )
 
+// Config is config of DB
 type Config struct {
 	DatabaseName    string
 	MigrationsTable string
 }
 
+// Firebird is struct of DB
 type Firebird struct {
 	// Locking and unlocking need to use the same connection
 	conn     *sql.Conn
@@ -42,6 +49,7 @@ type Firebird struct {
 	config *Config
 }
 
+// WithInstance return instance of DB
 func WithInstance(instance *sql.DB, config *Config) (database.Driver, error) {
 	if config == nil {
 		return nil, ErrNilConfig
@@ -73,6 +81,7 @@ func WithInstance(instance *sql.DB, config *Config) (database.Driver, error) {
 	return fb, nil
 }
 
+// Open is part of database.Driver interface implementation.
 func (f *Firebird) Open(dsn string) (database.Driver, error) {
 	purl, err := nurl.Parse(dsn)
 	if err != nil {
@@ -96,6 +105,7 @@ func (f *Firebird) Open(dsn string) (database.Driver, error) {
 	return px, nil
 }
 
+// Close is part of database.Driver interface implementation.
 func (f *Firebird) Close() error {
 	connErr := f.conn.Close()
 	dbErr := f.db.Close()
@@ -105,6 +115,7 @@ func (f *Firebird) Close() error {
 	return nil
 }
 
+// Lock is part of database.Driver interface implementation.
 func (f *Firebird) Lock() error {
 	if f.isLocked {
 		return database.ErrLocked
@@ -113,11 +124,13 @@ func (f *Firebird) Lock() error {
 	return nil
 }
 
+// Unlock is part of database.Driver interface implementation.
 func (f *Firebird) Unlock() error {
 	f.isLocked = false
 	return nil
 }
 
+// Run is part of database.Driver interface implementation.
 func (f *Firebird) Run(migration io.Reader) error {
 	migr, err := ioutil.ReadAll(migration)
 	if err != nil {
@@ -133,6 +146,7 @@ func (f *Firebird) Run(migration io.Reader) error {
 	return nil
 }
 
+// SetVersion is part of database.Driver interface implementation.
 func (f *Firebird) SetVersion(version int, dirty bool) error {
 	if version < 0 {
 		return nil
@@ -154,6 +168,7 @@ func (f *Firebird) SetVersion(version int, dirty bool) error {
 	return nil
 }
 
+// Version is part of database.Driver interface implementation.
 func (f *Firebird) Version() (version int, dirty bool, err error) {
 	var d int
 	query := fmt.Sprintf(`SELECT FIRST 1 version, dirty FROM "%v"`, f.config.MigrationsTable)
@@ -169,6 +184,7 @@ func (f *Firebird) Version() (version int, dirty bool, err error) {
 	}
 }
 
+// Drop is part of database.Driver interface implementation.
 func (f *Firebird) Drop() (err error) {
 	// select all tables
 	query := `SELECT rdb$relation_name FROM rdb$relations WHERE rdb$view_blr IS NULL AND (rdb$system_flag IS NULL OR rdb$system_flag = 0);`
@@ -250,4 +266,14 @@ func btoi(v bool) int {
 // itob converts int to bool
 func itob(v int) bool {
 	return v != 0
+}
+
+// StoreMigration store migration file to DB
+func (f *Firebird) StoreMigration(raw string, identifier string, direction source.Direction) error {
+	return nil
+}
+
+// IsMigrationExist check whether a migration file is imported
+func (f *Firebird) IsMigrationExist(identifier string, direction source.Direction) (ret bool, err error) {
+	return false, nil
 }

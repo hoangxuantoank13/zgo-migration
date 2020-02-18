@@ -1,7 +1,7 @@
 package neo4j
 
 import (
-	"C" // import C so that we can't compile with CGO_ENABLED=0
+	//"C" // import C so that we can't compile with CGO_ENABLED=0
 	"bytes"
 	"fmt"
 	"io"
@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/neo4j/neo4j-go-driver/neo4j"
 )
+import "github.com/golang-migrate/migrate/v4/source"
 
 func init() {
 	db := Neo4j{}
@@ -260,4 +261,14 @@ func (n *Neo4j) ensureVersionConstraint() (err error) {
 		return err
 	}
 	return nil
+}
+
+// StoreMigration store migration file to DB
+func (n *Neo4j) StoreMigration(raw string, identifier string, direction source.Direction) error {
+	return nil
+}
+
+// IsMigrationExist check whether a migration file is imported
+func (n *Neo4j) IsMigrationExist(identifier string, direction source.Direction) (ret bool, err error) {
+	return false, nil
 }

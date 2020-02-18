@@ -3,6 +3,8 @@ package database
 import (
 	"io"
 	"testing"
+
+	"github.com/golang-migrate/migrate/v4/source"
 )
 
 func ExampleDriver() {
@@ -50,6 +52,16 @@ func (m *mockDriver) Version() (version int, dirty bool, err error) {
 
 func (m *mockDriver) Drop() error {
 	return nil
+}
+
+// StoreMigration store migration file to DB
+func (m *mockDriver) StoreMigration(raw string, identifier string, direction source.Direction) error {
+	return nil
+}
+
+// IsMigrationExist check whether a migration file is imported
+func (m *mockDriver) IsMigrationExist(identifier string, direction source.Direction) (ret bool, err error) {
+	return false, nil
 }
 
 func TestRegisterTwice(t *testing.T) {

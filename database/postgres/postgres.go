@@ -15,6 +15,7 @@ import (
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database"
+	"github.com/golang-migrate/migrate/v4/source"
 	multierror "github.com/hashicorp/go-multierror"
 	"github.com/lib/pq"
 )
@@ -379,4 +380,14 @@ func (p *Postgres) ensureVersionTable() (err error) {
 	}
 
 	return nil
+}
+
+// StoreMigration store migration file to DB
+func (p *Postgres) StoreMigration(raw string, identifier string, direction source.Direction) error {
+	return nil
+}
+
+// IsMigrationExist check whether a migration file is imported
+func (p *Postgres) IsMigrationExist(identifier string, direction source.Direction) (ret bool, err error) {
+	return false, nil
 }

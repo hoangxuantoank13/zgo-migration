@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/golang-migrate/migrate/v4/database"
+	"github.com/golang-migrate/migrate/v4/source"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -188,4 +189,14 @@ func (m *Mongo) Lock() error {
 
 func (m *Mongo) Unlock() error {
 	return nil
+}
+
+// StoreMigration store migration file to DB
+func (m *Mongo) StoreMigration(raw string, identifier string, direction source.Direction) error {
+	return nil
+}
+
+// IsMigrationExist check whether a migration file is imported
+func (m *Mongo) IsMigrationExist(identifier string, direction source.Direction) (ret bool, err error) {
+	return false, nil
 }
