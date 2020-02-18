@@ -6,7 +6,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/zgo-migration/migrate/v4/source"
+	"github.com/zgo-migration/migrate/source"
 )
 
 func ExampleNewMigration() {

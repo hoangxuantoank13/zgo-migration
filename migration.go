@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"io"
 	"time"
-	"github.com/zgo-migration/migrate/v4/source"
+
+	"github.com/zgo-migration/migrate/source"
 )
 
 // DefaultBufferSize sets the in memory buffer size (in Bytes) for every

@@ -13,9 +13,9 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 
-	"github.com/zgo-migration/migrate/v4/database"
-	iurl "github.com/zgo-migration/migrate/v4/internal/url"
-	"github.com/zgo-migration/migrate/v4/source"
+	"github.com/zgo-migration/migrate/database"
+	iurl "github.com/zgo-migration/migrate/internal/url"
+	"github.com/zgo-migration/migrate/source"
 )
 
 // DefaultPrefetchMigrations sets the number of migrations to pre-read
