@@ -2,12 +2,14 @@ package httpfs
 
 import (
 	"errors"
-	"github.com/hoangxuantoank13/zgo-migration/source"
-	"github.com/spf13/viper"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path"
+
+	"github.com/hoangxuantoank13/zgo-migration/source"
+	"github.com/spf13/viper"
 )
 
 const migrationConfigFile = "_migrations.json"
@@ -32,6 +34,7 @@ type PartialDriver struct {
 // Init prepares not initialized PartialDriver instance to read migrations from a
 // http.FileSystem instance and a relative path.
 func (p *PartialDriver) Init(fs http.FileSystem, path string) error {
+	fmt.Println(path)
 	mapFile, err := readMigrationConfig(path)
 	if err != nil {
 		return err
