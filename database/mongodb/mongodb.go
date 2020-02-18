@@ -8,8 +8,8 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/zgo-migration/migrate/database"
-	"github.com/zgo-migration/migrate/source"
+	"github.com/hoangxuantoank13/zgo-migration/database"
+	"github.com/hoangxuantoank13/zgo-migration/source"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

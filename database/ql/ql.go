@@ -11,9 +11,9 @@ import (
 
 	nurl "net/url"
 
-	"github.com/zgo-migration/migrate"
-	"github.com/zgo-migration/migrate/database"
-	"github.com/zgo-migration/migrate/source"
+	"github.com/hoangxuantoank13/zgo-migration"
+	"github.com/hoangxuantoank13/zgo-migration/database"
+	"github.com/hoangxuantoank13/zgo-migration/source"
 	_ "modernc.org/ql/driver"
 )
 

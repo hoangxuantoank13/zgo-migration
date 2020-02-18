@@ -11,7 +11,7 @@ RUN git clone --depth 1 -b 1.7 https://github.com/neo4j-drivers/seabolt.git /sea
 WORKDIR /seabolt/build
 RUN cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_LIBDIR=lib .. && cmake --build . --target install
 
-WORKDIR /go/src/github.com/zgo-migration/migrate
+WORKDIR /go/src/github.com/hoangxuantoank13/zgo-migration
 
 ENV GO111MODULE=on
 ENV DATABASES="postgres mysql redshift cassandra spanner cockroachdb clickhouse mongodb sqlserver firebird sqlite3 neo4j"
@@ -31,7 +31,7 @@ RUN apk add --no-cache ca-certificates
 
 COPY --from=builder /usr/local/lib/libseabolt* /lib/
 
-COPY --from=builder /go/src/github.com/zgo-migration/migrate/build/migrate.linux-386 /migrate
+COPY --from=builder /go/src/github.com/hoangxuantoank13/zgo-migration/build/migrate.linux-386 /migrate
 
 ENTRYPOINT ["/migrate"]
 CMD ["--help"]

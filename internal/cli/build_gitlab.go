@@ -3,5 +3,5 @@
 package cli
 
 import (
-	_ "github.com/zgo-migration/migrate/source/gitlab"
+	_ "github.com/hoangxuantoank13/zgo-migration/source/gitlab"
 )

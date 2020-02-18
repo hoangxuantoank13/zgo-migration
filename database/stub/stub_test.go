@@ -3,7 +3,7 @@ package stub
 import (
 	"testing"
 
-	dt "github.com/zgo-migration/migrate/database/testing"
+	dt "github.com/hoangxuantoank13/zgo-migration/database/testing"
 )
 
 func Test(t *testing.T) {

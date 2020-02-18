@@ -13,9 +13,9 @@ cd examples/migrations && go-bindata -pkg migrations .
 
 ```go
 import (
-  "github.com/zgo-migration/migrate"
-  "github.com/zgo-migration/migrate/source/go_bindata"
-  "github.com/zgo-migration/migrate/source/go_bindata/examples/migrations"
+  "github.com/hoangxuantoank13/zgo-migration"
+  "github.com/hoangxuantoank13/zgo-migration/source/go_bindata"
+  "github.com/hoangxuantoank13/zgo-migration/source/go_bindata/examples/migrations"
 )
 
 func main() {

@@ -1,6 +1,6 @@
 package main
 
-import "github.com/zgo-migration/migrate/internal/cli"
+import "github.com/hoangxuantoank13/zgo-migration/internal/cli"
 
 // Deprecated, please use cmd/migrate
 func main() {

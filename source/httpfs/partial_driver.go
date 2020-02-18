@@ -2,8 +2,8 @@ package httpfs
 
 import (
 	"errors"
+	"github.com/hoangxuantoank13/zgo-migration/source"
 	"github.com/spf13/viper"
-	"github.com/zgo-migration/migrate/source"
 	"io"
 	"net/http"
 	"os"

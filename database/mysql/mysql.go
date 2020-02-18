@@ -15,9 +15,9 @@ import (
 	"strings"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/zgo-migration/migrate/database"
-	"github.com/zgo-migration/migrate/source"
 	"github.com/hashicorp/go-multierror"
+	"github.com/hoangxuantoank13/zgo-migration/database"
+	"github.com/hoangxuantoank13/zgo-migration/source"
 )
 
 func init() {
@@ -314,11 +314,12 @@ func (m *Mysql) StoreMigration(raw string, identifier string, direction source.D
 
 	return nil
 }
+
 // IsMigrationExist check whether a migration file is imported
 func (m *Mysql) IsMigrationExist(identifier string, direction source.Direction) (ret bool, err error) {
 	raw := ""
 	query := "SELECT raw FROM `" + m.config.MigrationsTable + "`" +
-			 "WHERE identifier = ? AND direction = ?"
+		"WHERE identifier = ? AND direction = ?"
 	err = m.conn.QueryRowContext(context.Background(), query, identifier, direction).Scan(&raw)
 	switch {
 	case err == sql.ErrNoRows:
@@ -471,14 +472,14 @@ func (m *Mysql) ensureVersionTable() (err error) {
 
 	// if not, create the empty migration table
 	//query = "CREATE TABLE `" + m.config.MigrationsTable + "` (version bigint not null primary key, dirty boolean not null)"
-	query = "CREATE TABLE `" + m.config.MigrationsTable + "` (" + 
+	query = "CREATE TABLE `" + m.config.MigrationsTable + "` (" +
 		"`id_" + m.config.MigrationsTable + "` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id of the schema update'," +
 		"`raw` varchar(255) NOT NULL COMMENT 'File name of the migration import to database.'," +
 		"`identifier` varchar(255) NOT NULL COMMENT 'Identifier of the migration import to database.'," +
 		"`direction` varchar(255) NOT NULL COMMENT 'Direction of the migration import to database.'," +
 		"`created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Date time when the migration ran.'," +
 		"PRIMARY KEY (`id_" + m.config.MigrationsTable + "`)" +
-	  ") ENGINE=InnoDB AUTO_INCREMENT=2458 DEFAULT CHARSET=utf8"
+		") ENGINE=InnoDB AUTO_INCREMENT=2458 DEFAULT CHARSET=utf8"
 	if _, err := m.conn.ExecContext(context.Background(), query); err != nil {
 		return &database.Error{OrigErr: err, Query: []byte(query)}
 	}

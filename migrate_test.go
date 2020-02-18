@@ -12,9 +12,9 @@ import (
 )
 
 import (
-	dStub "github.com/zgo-migration/migrate/database/stub"
-	"github.com/zgo-migration/migrate/source"
-	sStub "github.com/zgo-migration/migrate/source/stub"
+	dStub "github.com/hoangxuantoank13/zgo-migration/database/stub"
+	"github.com/hoangxuantoank13/zgo-migration/source"
+	sStub "github.com/hoangxuantoank13/zgo-migration/source/stub"
 )
 
 // sourceStubMigrations hold the following migrations:
@@ -117,7 +117,7 @@ func ExampleNewWithDatabaseInstance() {
 
 	// Create driver instance from db.
 	// Check each driver if it supports the WithInstance function.
-	// `import "github.com/zgo-migration/migrate/database/postgres"`
+	// `import "github.com/hoangxuantoank13/zgo-migration/database/postgres"`
 	instance, err := dStub.WithInstance(db, &dStub.Config{})
 	if err != nil {
 		log.Fatal(err)
@@ -167,7 +167,7 @@ func ExampleNewWithSourceInstance() {
 
 	// Create driver instance from DummyInstance di.
 	// Check each driver if it support the WithInstance function.
-	// `import "github.com/zgo-migration/migrate/source/stub"`
+	// `import "github.com/hoangxuantoank13/zgo-migration/source/stub"`
 	instance, err := sStub.WithInstance(di, &sStub.Config{})
 	if err != nil {
 		log.Fatal(err)

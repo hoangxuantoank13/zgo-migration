@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/xanzy/go-gitlab"
-	"github.com/zgo-migration/migrate/source"
+	"github.com/hoangxuantoank13/zgo-migration/source"
 )
 
 func init() {

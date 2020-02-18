@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"reflect"
 
-	"github.com/zgo-migration/migrate/database"
-	"github.com/zgo-migration/migrate/source"
+	"github.com/hoangxuantoank13/zgo-migration/database"
+	"github.com/hoangxuantoank13/zgo-migration/source"
 )
 
 func init() {

@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/zgo-migration/migrate/source"
+	"github.com/hoangxuantoank13/zgo-migration/source"
 )
 
 // Test runs tests against source implementations.

@@ -3,5 +3,5 @@
 package cli
 
 import (
-	_ "github.com/zgo-migration/migrate/database/sqlite3"
+	_ "github.com/hoangxuantoank13/zgo-migration/database/sqlite3"
 )

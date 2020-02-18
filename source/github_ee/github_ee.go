@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/google/go-github/github"
-	"github.com/zgo-migration/migrate/source"
-	gh "github.com/zgo-migration/migrate/source/github"
+	"github.com/hoangxuantoank13/zgo-migration/source"
+	gh "github.com/hoangxuantoank13/zgo-migration/source/github"
 )
 
 func init() {

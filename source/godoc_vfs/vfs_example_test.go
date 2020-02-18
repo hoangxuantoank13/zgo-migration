@@ -1,8 +1,8 @@
 package godoc_vfs_test
 
 import (
-	"github.com/zgo-migration/migrate"
-	"github.com/zgo-migration/migrate/source/godoc_vfs"
+	"github.com/hoangxuantoank13/zgo-migration"
+	"github.com/hoangxuantoank13/zgo-migration/source/godoc_vfs"
 	"golang.org/x/tools/godoc/vfs/mapfs"
 )
 

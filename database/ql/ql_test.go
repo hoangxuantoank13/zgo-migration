@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/zgo-migration/migrate"
-	dt "github.com/zgo-migration/migrate/database/testing"
-	_ "github.com/zgo-migration/migrate/source/file"
+	"github.com/hoangxuantoank13/zgo-migration"
+	dt "github.com/hoangxuantoank13/zgo-migration/database/testing"
+	_ "github.com/hoangxuantoank13/zgo-migration/source/file"
 	_ "modernc.org/ql/driver"
 )
 

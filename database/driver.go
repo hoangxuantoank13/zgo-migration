@@ -9,8 +9,8 @@ import (
 	"io"
 	"sync"
 
-	iurl "github.com/zgo-migration/migrate/internal/url"
-	"github.com/zgo-migration/migrate/source"
+	iurl "github.com/hoangxuantoank13/zgo-migration/internal/url"
+	"github.com/hoangxuantoank13/zgo-migration/source"
 )
 
 //Error const

@@ -6,7 +6,7 @@ package testing
 import (
 	"testing"
 
-	"github.com/zgo-migration/migrate"
+	"github.com/hoangxuantoank13/zgo-migration"
 )
 
 // TestMigrate runs integration-tests between the Migrate layer and database implementations.

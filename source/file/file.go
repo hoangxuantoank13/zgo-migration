@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/zgo-migration/migrate/source"
-	"github.com/zgo-migration/migrate/source/httpfs"
+	"github.com/hoangxuantoank13/zgo-migration/source"
+	"github.com/hoangxuantoank13/zgo-migration/source/httpfs"
 )
 
 func init() {

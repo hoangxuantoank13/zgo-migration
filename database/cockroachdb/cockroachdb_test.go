@@ -6,7 +6,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/zgo-migration/migrate"
+	"github.com/hoangxuantoank13/zgo-migration"
 	"log"
 	"strings"
 	"testing"
@@ -18,9 +18,9 @@ import (
 )
 
 import (
-	dt "github.com/zgo-migration/migrate/database/testing"
-	"github.com/zgo-migration/migrate/dktesting"
-	_ "github.com/zgo-migration/migrate/source/file"
+	dt "github.com/hoangxuantoank13/zgo-migration/database/testing"
+	"github.com/hoangxuantoank13/zgo-migration/dktesting"
+	_ "github.com/hoangxuantoank13/zgo-migration/source/file"
 )
 
 const defaultPort = 26257

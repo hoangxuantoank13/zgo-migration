@@ -6,7 +6,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/zgo-migration/migrate/source"
+	"github.com/hoangxuantoank13/zgo-migration/source"
 )
 
 // DefaultBufferSize sets the in memory buffer size (in Bytes) for every

@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/gocql/gocql"
-	"github.com/zgo-migration/migrate/database"
-	"github.com/zgo-migration/migrate/source"
 	"github.com/hashicorp/go-multierror"
+	"github.com/hoangxuantoank13/zgo-migration/database"
+	"github.com/hoangxuantoank13/zgo-migration/source"
 )
 
 func init() {

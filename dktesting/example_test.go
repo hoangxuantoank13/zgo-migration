@@ -3,14 +3,9 @@ package dktesting_test
 import (
 	"context"
 	"testing"
-)
 
-import (
 	"github.com/dhui/dktest"
-)
-
-import (
-	"github.com/zgo-migration/migrate/dktesting"
+	"github.com/hoangxuantoank13/zgo-migration/dktesting"
 )
 
 func ExampleParallelTest() {

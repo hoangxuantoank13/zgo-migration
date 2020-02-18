@@ -27,9 +27,9 @@ import (
     "database/sql"
     
     _ "github.com/go-sql-driver/mysql"
-    "github.com/zgo-migration/migrate"
-    "github.com/zgo-migration/migrate/database/mysql"
-    _ "github.com/zgo-migration/migrate/source/file"
+    "github.com/hoangxuantoank13/zgo-migration"
+    "github.com/hoangxuantoank13/zgo-migration/database/mysql"
+    _ "github.com/hoangxuantoank13/zgo-migration/source/file"
 )
 
 func main() {

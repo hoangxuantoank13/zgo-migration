@@ -3,9 +3,9 @@ package cli
 import (
 	"errors"
 	"fmt"
-	"github.com/zgo-migration/migrate"
-	_ "github.com/zgo-migration/migrate/database/stub" // TODO remove again
-	_ "github.com/zgo-migration/migrate/source/file"
+	"github.com/hoangxuantoank13/zgo-migration"
+	_ "github.com/hoangxuantoank13/zgo-migration/database/stub" // TODO remove again
+	_ "github.com/hoangxuantoank13/zgo-migration/source/file"
 	"os"
 	"path/filepath"
 	"strconv"

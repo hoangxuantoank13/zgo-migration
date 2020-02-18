@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/zgo-migration/migrate/database"
+	"github.com/hoangxuantoank13/zgo-migration/database"
 )
 
 // Test runs tests against database implementations.

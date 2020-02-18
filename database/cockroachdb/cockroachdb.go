@@ -11,10 +11,10 @@ import (
 	"strconv"
 
 	"github.com/cockroachdb/cockroach-go/crdb"
-	"github.com/zgo-migration/migrate"
-	"github.com/zgo-migration/migrate/database"
-	"github.com/zgo-migration/migrate/source"
 	"github.com/hashicorp/go-multierror"
+	"github.com/hoangxuantoank13/zgo-migration"
+	"github.com/hoangxuantoank13/zgo-migration/database"
+	"github.com/hoangxuantoank13/zgo-migration/source"
 	"github.com/lib/pq"
 )
 
@@ -194,7 +194,7 @@ func (c *CockroachDb) Lock() error {
 
 	c.isLocked = true
 	return nil
-	
+
 }
 
 // Unlock is done manually with a separate lock table.  Implementing advisory locks in CRDB is being discussed
@@ -376,7 +376,6 @@ func (c *CockroachDb) ensureLockTable() error {
 
 	return nil
 }
-
 
 // StoreMigration store migration file to DB
 func (c *CockroachDb) StoreMigration(raw string, identifier string, direction source.Direction) error {

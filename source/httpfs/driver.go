@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/zgo-migration/migrate/source"
+	"github.com/hoangxuantoank13/zgo-migration/source"
 )
 
 // driver is a migration source driver for reading migrations from

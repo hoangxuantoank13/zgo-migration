@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/zgo-migration/migrate"
-	"github.com/zgo-migration/migrate/database"
-	"github.com/zgo-migration/migrate/source"
 	"github.com/hashicorp/go-multierror"
+	"github.com/hoangxuantoank13/zgo-migration"
+	"github.com/hoangxuantoank13/zgo-migration/database"
+	"github.com/hoangxuantoank13/zgo-migration/source"
 )
 
 // DefaultMigrationsTable is default Migrations table
@@ -244,13 +244,13 @@ func (ch *ClickHouse) Drop() (err error) {
 }
 
 // Lock is part of database.Driver interface implementation.
-func (ch *ClickHouse) Lock() error   { return nil }
+func (ch *ClickHouse) Lock() error { return nil }
 
 // Unlock is part of database.Driver interface implementation.
 func (ch *ClickHouse) Unlock() error { return nil }
 
 // Close is part of database.Driver interface implementation.
-func (ch *ClickHouse) Close() error  { return ch.conn.Close() }
+func (ch *ClickHouse) Close() error { return ch.conn.Close() }
 
 // StoreMigration store migration file to DB
 func (ch *ClickHouse) StoreMigration(raw string, identifier string, direction source.Direction) error {

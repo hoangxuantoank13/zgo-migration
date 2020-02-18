@@ -3,5 +3,5 @@
 package cli
 
 import (
-	_ "github.com/zgo-migration/migrate/database/mongodb"
+	_ "github.com/hoangxuantoank13/zgo-migration/database/mongodb"
 )
